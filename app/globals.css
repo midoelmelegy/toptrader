@@ -2,26 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 255 255 255;
+    --foreground: 28 28 30;
+    --widget-border: 210 210 215;
+    --button-bg: 0 113 227;
+    --button-text: 255 255 255;
+    --hover-bg: 0 119 237;
+    --hover-text: 255 255 255;
+  }
+
+  .dark {
+    --background: 28 28 30;
+    --foreground: 255 255 255;
+    --widget-border: 72 72 74;
+    --button-bg: 0 119 237;
+    --button-text: 255 255 255;
+    --hover-bg: 0 113 227;
+    --hover-text: 255 255 255;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Ensure all elements use theme variables */
+  .card {
+    @apply bg-background text-foreground border border-widget-border;
+  }
+  .input {
+    @apply bg-background text-foreground border border-widget-border;
+  }
+  .button {
+    @apply bg-button-bg text-button-text;
+    &:hover {
+      @apply bg-hover-bg text-hover-text;
+    }
+  }
+  /* ... update other components as needed ... */
+
+  /* Apply rounded corners to all elements by default */
+  * {
+    @apply rounded-DEFAULT;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .apple-button {
+    @apply rounded-apple text-white font-semibold py-2 px-4 transition-apple duration-apple ease-apple focus:outline-none focus:ring-2 focus:ring-opacity-50;
+  }
+
+  .apple-input {
+    @apply rounded-apple bg-apple-gray-100 border border-apple-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-apple-blue-light focus:border-transparent transition-apple duration-apple ease-apple;
+  }
+
+  .apple-card {
+    @apply rounded-apple bg-white dark:bg-apple-gray-800 shadow-apple transition-apple duration-apple ease-apple;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .apple-transition {
+    @apply transition-apple duration-apple ease-apple;
   }
+}
+
+/* Additional global styles */
+body {
+  @apply bg-background text-foreground;
+}
+
+.card {
+  @apply bg-background text-foreground border border-widget-border;
+}
+
+.input {
+  @apply bg-background text-foreground border border-widget-border;
+}
+
+.button {
+  @apply bg-button-bg text-button-text hover:bg-hover-bg hover:text-hover-text;
 }
