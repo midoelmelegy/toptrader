@@ -1,10 +1,10 @@
 import Wrapper from '../wrapper'
-import { CommunityComponent } from '../../components/community'
+import { CommunityPageComponent } from '../../components/community'
 
 export default function DashboardPage() {
   return (
     <Wrapper>
-      <CommunityComponent />
+      <CommunityPageComponent />
     </Wrapper>
   )
 }
