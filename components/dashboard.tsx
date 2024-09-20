@@ -235,6 +235,7 @@ export function DashboardComponent() {
           >
             {isSidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
+          <h2 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">Widgets</h2>
         </div>
         {!isSidebarCollapsed && (
           <>

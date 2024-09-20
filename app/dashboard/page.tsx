@@ -1,5 +1,10 @@
+import Wrapper from '../wrapper'
 import { DashboardComponent } from '@/components/dashboard'
 
 export default function DashboardPage() {
-  return <DashboardComponent />
+  return (
+    <Wrapper>
+      <DashboardComponent />
+    </Wrapper>
+  )
 }
