@@ -1,117 +1,90 @@
-'use client'
-
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
+import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowBigUp, ArrowBigDown, MessageSquare, Share2 } from 'lucide-react'
 
-interface Post {
-  id: number
+interface Community {
+  id: string
   title: string
-  author: string
-  content: string
-  upvotes: number
-  comments: number
+  description: string
+  imageUrl: string
 }
 
-const initialPosts: Post[] = [
+export const communities: Community[] = [
   {
-    id: 1,
-    title: "Just found this amazing new web development tool!",
-    author: "webdev_enthusiast",
-    content: "Has anyone else tried out this new tool? It's revolutionizing the way I build websites!",
-    upvotes: 152,
-    comments: 23,
+    id: "1",
+    title: "Tech Enthusiasts",
+    description: "A community for discussing the latest in technology",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=Tech"
   },
   {
-    id: 2,
-    title: "Seeking advice on learning React",
-    author: "react_newbie",
-    content: "I'm new to React and feeling overwhelmed. Any tips on where to start or good resources?",
-    upvotes: 78,
-    comments: 45,
+    id: "2",
+    title: "Data Visualizers",
+    description: "Share and discuss innovative data visualization techniques",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=Data"
   },
   {
-    id: 3,
-    title: "Discussion: TypeScript vs JavaScript",
-    author: "type_enthusiast",
-    content: "Let's discuss the pros and cons of TypeScript compared to vanilla JavaScript. What are your thoughts?",
-    upvotes: 203,
-    comments: 87,
+    id: "3",
+    title: "UI/UX Designers",
+    description: "Collaborate on user interface and experience design",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=UI/UX"
+  },
+  {
+    id: "4",
+    title: "AI Researchers",
+    description: "Explore the latest advancements in artificial intelligence",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=AI"
+  },
+  {
+    id: "5",
+    title: "Web Developers",
+    description: "Share tips and tricks for modern web development",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=Web+Dev"
+  },
+  {
+    id: "6",
+    title: "IoT Innovators",
+    description: "Discuss Internet of Things projects and ideas",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=IoT"
+  },
+  {
+    id: "7",
+    title: "Cybersecurity Experts",
+    description: "Stay updated on the latest in cybersecurity",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=Security"
+  },
+  {
+    id: "8",
+    title: "Cloud Computing",
+    description: "Explore cloud technologies and best practices",
+    imageUrl: "/placeholder.svg?height=200&width=400&text=Cloud"
   },
 ]
 
-export function CommunityComponent() {
-  const [posts, setPosts] = useState<Post[]>(initialPosts)
-
-  const handleVote = (id: number, increment: number) => {
-    setPosts(posts.map(post => 
-      post.id === id ? { ...post, upvotes: post.upvotes + increment } : post
-    ))
-  }
-
+export function CommunityPageComponent() {
   return (
-      <div className="flex gap-6">
-        <div className="flex-grow space-y-6">
-          {posts.map(post => (
-            <Card key={post.id}>
-              <CardHeader>
-                <CardTitle>{post.title}</CardTitle>
-                <div className="text-sm text-gray-500">Posted by u/{post.author}</div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Community Dashboards</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {communities.map((community) => (
+          <Link href={`/community/${community.id}`} key={community.id}>
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="p-0">
+                <Image
+                  src={community.imageUrl}
+                  alt={community.title}
+                  width={400}
+                  height={200}
+                  className="w-full h-48 object-cover"
+                />
               </CardHeader>
-              <CardContent>
-                <p>{post.content}</p>
+              <CardContent className="p-4">
+                <CardTitle className="text-xl mb-2">{community.title}</CardTitle>
+                <p className="text-sm text-gray-600">{community.description}</p>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleVote(post.id, 1)}>
-                    <ArrowBigUp className="h-5 w-5" />
-                  </Button>
-                  <span>{post.upvotes}</span>
-                  <Button variant="ghost" size="sm" onClick={() => handleVote(post.id, -1)}>
-                    <ArrowBigDown className="h-5 w-5" />
-                  </Button>
-                </div>
-                <Button variant="ghost" size="sm">
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  {post.comments} Comments
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Share
-                </Button>
-              </CardFooter>
             </Card>
-          ))}
-        </div>
-        <div className="w-80">
-          <Card>
-            <CardHeader>
-              <CardTitle>About Community</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">Welcome to our web development community! Share your experiences, ask questions, and learn from others.</p>
-              <div className="flex items-center space-x-2 mb-2">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=50&width=50" />
-                  <AvatarFallback>WD</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-semibold">Created Jan 1, 2023</div>
-                  <div className="text-sm text-gray-500">by u/webdev_mod</div>
-                </div>
-              </div>
-              <div className="text-sm">
-                <div>Members: 52,384</div>
-                <div>Online: 1,245</div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full">Join Community</Button>
-            </CardFooter>
-          </Card>
-        </div>
+          </Link>
+        ))}
       </div>
+    </div>
   )
 }

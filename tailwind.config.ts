@@ -90,7 +90,12 @@ const config: Config = {
   	},
   	borderRadius: {
   		'apple': '0.75rem',
-  		'DEFAULT': '0.5rem', // This will be the default border radius for all elements
+  		'DEFAULT': '0.75rem',
+  		'sm': '0.5rem',
+  		'md': '0.75rem',
+  		'lg': '1rem',
+  		'xl': '1.5rem',
+  		'full': '9999px',
   	},
   	boxShadow: {
   		'apple': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
