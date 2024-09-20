@@ -23,6 +23,8 @@ interface WrapperProps {
 const pages: Record<string, string> = {
     "dashboard": "Dashboard",
     "community": "Community",
+    "settings": "Settings",
+    "profile": "Profile",
 };
 
 export default function Wrapper({ children }: WrapperProps) {
@@ -68,10 +70,8 @@ export default function Wrapper({ children }: WrapperProps) {
                         {dropdownOptions}
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <h1 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">
-                    {pages[String(Object.keys(pages).find((pageKey) => pathname?.includes(pageKey)))]}
-                </h1>
-            </div>
+            <h1 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">{pathname}</h1>
+          </div>
           <div className="flex items-center space-x-4">
             <Button onClick={toggleTheme} className="apple-button rounded-full">
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -80,7 +80,7 @@ export default function Wrapper({ children }: WrapperProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-8 w-8 rounded-full">
                     <AvatarImage src="/placeholder.svg?height=32&width=32&text=JD" alt="@johndoe" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
