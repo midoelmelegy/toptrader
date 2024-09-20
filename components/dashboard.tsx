@@ -46,6 +46,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from '@/lib/firebase'; 
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 // Widgets object
@@ -104,11 +107,14 @@ export function DashboardComponent() {
   }, [])
 
   const onLayoutChange = useCallback((newLayout: Layout[]) => {
-    setLayout(newLayout.map(item => {
-      const existingItem = layout.find(layoutItem => layoutItem.i === item.i)
-      return {...item, type: existingItem?.type || item.i.split('-')[0]}
-    }))
-  }, [layout])
+    setLayout((prevLayout) =>
+      newLayout.map((item) => {
+        const existingItem = prevLayout.find((layoutItem) => layoutItem.i === item.i);
+        return { ...item, type: existingItem?.type || item.i.split('-')[0] };
+      })
+    );
+  }, []);
+  
 
   const onDragStart = useCallback((e: React.DragEvent, widgetType: string) => {
     e.dataTransfer.setData('text/plain', widgetType)
@@ -172,16 +178,94 @@ export function DashboardComponent() {
     return WidgetComponent ? <WidgetComponent /> : <div>Widget not found</div>
   }, [])
 
-  const saveLayout = useCallback(() => {
-    localStorage.setItem('dashboardLayout', JSON.stringify(layout))
-  }, [layout])
-
-  const loadLayout = useCallback(() => {
-    const savedLayout = localStorage.getItem('dashboardLayout')
-    if (savedLayout) {
-      setLayout(JSON.parse(savedLayout))
+  const saveLayout = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You need to log in first');
+        console.error('User is not logged in');
+        return;
+      }
+  
+      // Create a simplified layout array containing the relevant information
+      const layoutToSave = layout.map(item => ({
+        i: item.i,  // Unique identifier for the widget
+        type: item.type,  // Assuming `type` holds the widget name
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h
+      }));
+  
+      console.log(`Saving layout for user: ${user.uid}`); // Log the user ID
+      console.log('Layout being saved:', layoutToSave); // Log the layout being saved
+  
+      // Reference to the user's layout document
+      const layoutDocRef = doc(db, 'userLayouts', user.uid);
+      
+      // Save the layout to Firestore
+      await setDoc(layoutDocRef, { layout: layoutToSave }, { merge: true });
+      
+      alert('Layout saved successfully!');
+      console.log('Layout saved successfully');
+    } catch (error) {
+      console.error('Error saving layout:', error); // Log error for better understanding
+      alert('Failed to save layout. Please try again.');
     }
-  }, [])
+  }, [layout]);
+  
+  
+  
+  
+
+  const loadLayout = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You need to log in first');
+        return;
+      }
+  
+      // Reference to the user's layout document in Firestore
+      const layoutDocRef = doc(db, 'userLayouts', user.uid);
+  
+      // Fetch the layout document from Firestore
+      const layoutDoc = await getDoc(layoutDocRef);
+  
+      if (layoutDoc.exists()) {
+        const savedLayout = layoutDoc.data().layout;
+  
+        // Check if the layout has valid data and update the state
+        if (savedLayout && Array.isArray(savedLayout)) {
+          const layoutToLoad = savedLayout.map(item => ({
+            i: item.i || `${item.type}-${Date.now()}`,  // Unique identifier for the widget
+            type: item.type,
+            x: item.x,
+            y: item.y,
+            w: item.w,
+            h: item.h,
+          }));
+  
+          setLayout(layoutToLoad);  // Update the layout state with the saved layout
+          console.log('Layout loaded successfully:', layoutToLoad);  // Log the saved layout for debugging
+        } else {
+          console.error('No valid layout found for this user.');
+        }
+      } else {
+        console.log('No layout found for this user.');
+      }
+    } catch (error) {
+      console.error('Error loading layout:', error);
+      alert('Failed to load layout. Please try again.');
+    }
+  }, []);
+  
+  
+  useEffect(() => {
+    loadLayout();  // Load layout when the component mounts
+  }, [loadLayout]);
+  
+  
 
   useEffect(() => {
     loadLayout()
