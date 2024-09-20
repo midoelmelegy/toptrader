@@ -46,6 +46,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from '@/lib/firebase'; 
+
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 // Widgets object
@@ -172,16 +175,53 @@ export function DashboardComponent() {
     return WidgetComponent ? <WidgetComponent /> : <div>Widget not found</div>
   }, [])
 
-  const saveLayout = useCallback(() => {
-    localStorage.setItem('dashboardLayout', JSON.stringify(layout))
-  }, [layout])
-
-  const loadLayout = useCallback(() => {
-    const savedLayout = localStorage.getItem('dashboardLayout')
-    if (savedLayout) {
-      setLayout(JSON.parse(savedLayout))
+  const saveLayout = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You need to log in first');
+        return;
+      }
+  
+      // Reference to the user's layout document
+      const layoutDocRef = doc(db, 'userLayouts', user.uid);
+  
+      // Save the layout
+      await setDoc(layoutDocRef, { layout }, { merge: true });
+  
+      alert('Layout saved successfully!');
+    } catch (error) {
+      console.error('Error saving layout:', error);
+      alert('Failed to save layout. Please try again.');
     }
-  }, [])
+  }, [layout]);
+  
+
+  const loadLayout = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You need to log in first');
+        return;
+      }
+  
+      // Reference to the user's layout document
+      const layoutDocRef = doc(db, 'userLayouts', user.uid);
+  
+      // Get the document from Firestore
+      const layoutDoc = await getDoc(layoutDocRef);
+  
+      if (layoutDoc.exists()) {
+        setLayout(layoutDoc.data().layout || []);
+      } else {
+        console.log('No layout found for this user');
+      }
+    } catch (error) {
+      console.error('Error loading layout:', error);
+      alert('Failed to load layout. Please try again.');
+    }
+  }, []);
+  
 
   useEffect(() => {
     loadLayout()
