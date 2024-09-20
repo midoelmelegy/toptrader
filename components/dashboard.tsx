@@ -224,7 +224,7 @@ export function DashboardComponent() {
 
   return (
     <div className="flex h-screen bg-apple-gray-100 dark:bg-apple-gray-900">
-      <aside className={`fixed top-0 left-0 h-full z-10 ${isSidebarCollapsed ? 'w-16' : 'w-64'} p-6 bg-white dark:bg-apple-gray-800 shadow-apple rounded-r-apple transition-all duration-300 ease-in-out flex flex-col`}>
+      <aside className={`flex top-0 left-0 h-full z-10 ${isSidebarCollapsed ? 'w-16' : 'w-64'} p-6 bg-white dark:bg-apple-gray-800 shadow-apple rounded-r-apple transition-all duration-300 ease-in-out flex flex-col`}>
         <div className="flex justify-between items-center mb-8">
           {!isSidebarCollapsed && <h2 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">Widgets</h2>}
           <Button
@@ -235,7 +235,6 @@ export function DashboardComponent() {
           >
             {isSidebarCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
           </Button>
-          <h2 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">Widgets</h2>
         </div>
         {!isSidebarCollapsed && (
           <>
@@ -289,7 +288,7 @@ export function DashboardComponent() {
             <Button onClick={deployLayout} className="apple-button bg-green-500 hover:bg-green-600 rounded-full">
               Deploy
             </Button>
-            <Button onClick={toggleTheme} className="apple-button rounded-full">
+            {/* <Button onClick={toggleTheme} className="apple-button rounded-full">
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
             <Bell className="h-6 w-6 text-apple-gray-500 cursor-pointer hover:text-apple-gray-700 apple-transition" />
@@ -321,7 +320,7 @@ export function DashboardComponent() {
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </header>
         <div
