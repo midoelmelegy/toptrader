@@ -9,14 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import {
-    ThirdwebProvider,
-    rainbowWallet,
-    metamaskWallet,
-    coinbaseWallet,
-    ConnectWallet,
-} from "@thirdweb-dev/react";
-
+import { createThirdwebClient } from "thirdweb";
+import { ThirdwebProvider, ConnectButton } from "thirdweb/react";
 
 import {
     DropdownMenu,
@@ -39,6 +33,10 @@ const pages: Record<string, string> = {
 };
 
 const activeChain = "ethereum";
+
+const client = createThirdwebClient({
+    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID,
+});
 
 export default function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
@@ -83,11 +81,7 @@ export default function Wrapper({ children }: WrapperProps) {
     };
 
     return (
-        <ThirdwebProvider
-            clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
-            activeChain={activeChain}
-            supportedWallets={[coinbaseWallet(), rainbowWallet(), metamaskWallet()]}
-        >
+        <ThirdwebProvider>
             <div className="flex flex-col h-screen">
                 <header className="w-full p-4 bg-white dark:bg-apple-gray-800 shadow-apple">
                     <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -108,7 +102,7 @@ export default function Wrapper({ children }: WrapperProps) {
                             </h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <ConnectWallet theme={theme} />
+                            <ConnectButton client={client} />
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                             </Button>
