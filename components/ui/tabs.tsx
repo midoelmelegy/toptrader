@@ -60,7 +60,7 @@ export function TabsTrigger({ value, className, children }: TabsTriggerProps) {
 
   return (
     <button
-      className={`${className} ${isActive ? 'bg-white text-black' : 'text-white'}`}
+      className={`${className} ${!(className?.includes('text')) ? (isActive ? 'bg-white text-black' : 'text-white') : (isActive ? 'bg-white':'')}`}
       onClick={() => onValueChange(value)}
     >
       {children}
