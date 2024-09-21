@@ -1,5 +1,13 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Bell, Flame, Menu, Zap } from 'lucide-react'
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { communities } from './community/communities'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { Button } from '@/components/ui/button'
@@ -94,6 +102,125 @@ export function ProfileComponent() {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Mock data for profiles
+const profiles = [
+  { id: "1", name: "Alice", level: 5, experience: 75, followers: 1234, following: 567, reputationScore: 89, rank: 'Gold', joinedDate: '2023-01-15' },
+  { id: "2", name: "Bob", level: 6, experience: 85, followers: 2345, following: 678, reputationScore: 78, rank: 'Silver', joinedDate: '2023-02-12' },
+  { id: "3", name: "Charlie", level: 4, experience: 65, followers: 3456, following: 789, reputationScore: 92, rank: 'Platinum', joinedDate: '2023-03-10' },
+  { id: "4", name: "David", level: 7, experience: 95, followers: 4567, following: 890, reputationScore: 85, rank: 'Gold', joinedDate: '2023-04-05' },
+  // Add more profiles if necessary
+]
+
+export function ProfileSearchComponent() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeTab, setActiveTab] = useState("followers") // Default sorting by followers
+  const router = useRouter()
+
+  // Filter and sort profiles based on the selected filter and search term
+  const filteredProfiles = profiles
+    .filter(profile => profile.name.toLowerCase().includes(searchTerm.toLowerCase())) // Filter by search term
+    .sort((a, b) => {
+      switch (activeTab) {
+        case 'experience':
+          return b.experience - a.experience
+        case 'reputationScore':
+          return b.reputationScore - a.reputationScore
+        case 'followers':
+        default:
+          return b.followers - a.followers
+      }
+    })
+
+  const handleProfileClick = (id: string) => {
+    router.push(`/profile/${id}`)
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+  }
+
+  return (
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <main className="container mx-auto p-8">
+        <div className="mb-6">
+          {/* Search input */}
+          <Input
+            type="search"
+            placeholder="Search profiles..."
+            className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Tabs for sorting */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            {/* Filter by Followers */}
+            <TabsTrigger
+              value="followers"
+              className={activeTab === 'followers' ? 'text-black' : 'text-gray-500'}
+            >
+              Followers
+            </TabsTrigger>
+
+            {/* Filter by Experience */}
+            <TabsTrigger
+              value="experience"
+              className={activeTab === 'experience' ? 'text-black' : 'text-gray-500'}
+            >
+              Experience
+            </TabsTrigger>
+
+            {/* Filter by Reputation Score */}
+            <TabsTrigger
+              value="reputationScore"
+              className={activeTab === 'reputationScore' ? 'text-black' : 'text-gray-500'}
+            >
+              Reputation Score
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Display profiles */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {filteredProfiles.map((profile) => (
+            <div 
+              key={profile.id} 
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer shadow-md"
+              onClick={() => handleProfileClick(profile.id)}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-10 w-10 text-2xl">
+                    <AvatarFallback>{profile.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <h3 className="text-xl font-semibold">{profile.name}</h3>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Rank: {profile.rank}</p>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{profile.followers} followers</span>
+                <Badge variant="secondary" className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                  Lvl {profile.level}
+                </Badge>
+              </div>
+              <Progress value={profile.experience} className="mb-4" />
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Boost Button */}
+      <div className="fixed bottom-8 right-8">
+        <Button size="lg" className="rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90">
+          <Zap className="mr-2 h-5 w-5" /> Boost Your XP
+        </Button>
       </div>
     </div>
   )

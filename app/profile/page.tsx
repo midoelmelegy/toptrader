@@ -1,10 +1,10 @@
 import Wrapper from '../wrapper'
-import { ProfileComponent } from '@/components/profile'
+import { ProfileSearchComponent } from '@/components/profile'
 
 export default function ProfilePage() {
   return (
     <Wrapper>
-      <ProfileComponent />
+      <ProfileSearchComponent />
     </Wrapper>
   )
 }
