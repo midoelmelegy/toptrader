@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import type { AppProps } from "next/app";
 import {
     ThirdwebProvider,
     rainbowWallet,
