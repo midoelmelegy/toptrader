@@ -1,5 +1,5 @@
 import { DashboardComponent } from '../../../components/dashboard'
-import { communities } from '../../../components/community'
+import { communities } from '../../../components/community/communities'
 import { ChatBox } from '../../../components/chat'
 import Wrapper from '../../wrapper'
 import { notFound } from 'next/navigation'
