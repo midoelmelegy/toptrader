@@ -45,7 +45,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore"; // Import collection and getDocs
 import { auth, db } from '@/lib/firebase'; 
 import { useAuth } from '@/lib/useAuth'
 import { useRouter } from 'next/navigation'  // Change this import
@@ -82,7 +82,11 @@ interface Widgets {
   [key: string]: WidgetDefinition
 }
 
-export function DashboardComponent() {
+interface DashboardComponentProps {
+  id?: string | null; // Optional ID for a non-editable deployed layout
+}
+
+export function DashboardComponent({ id = null }: DashboardComponentProps) {
   const router = useRouter()
   const { user, loading } = useAuth()
   const [layout, setLayout] = useState<Array<Layout & { type?: string }>>([])
@@ -103,6 +107,92 @@ export function DashboardComponent() {
       router.push('/login')
     }
   }, [user, loading, router])
+
+  // If id is provided, fetch the layout for that specific id
+  const loadDeployedLayout = useCallback(async () => {
+    if (id) {
+      try {
+        const layoutDocRef = doc(db, 'deployedLayouts', id);
+        const layoutDoc = await getDoc(layoutDocRef);
+        console.log("loading layout for id ", id);
+        if (layoutDoc.exists()) {
+          const savedLayout = layoutDoc.data().layout;
+          if (savedLayout && Array.isArray(savedLayout)) {
+            const layoutToLoad = savedLayout.map(item => ({
+              i: item.i || `${item.type}-${Date.now()}`,
+              type: item.type,
+              x: item.x,
+              y: item.y,
+              w: item.w,
+              h: item.h,
+            }));
+            console.log(layoutToLoad);
+            setLayout(layoutToLoad);
+          } else {
+            console.error('Invalid layout data');
+          }
+        } else {
+          console.error('No layout found for this id');
+        }
+      } catch (error) {
+        console.error('Error loading deployed layout:', error);
+      }
+    }
+  }, [id]);
+
+
+  const loadLayout = useCallback(async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You need to log in first');
+        return;
+      }
+  
+      // Reference to the user's layout document in Firestore
+      const layoutDocRef = doc(db, 'userLayouts', user.uid);
+  
+      // Fetch the layout document from Firestore
+      const layoutDoc = await getDoc(layoutDocRef);
+  
+      if (layoutDoc.exists()) {
+        const savedLayout = layoutDoc.data().layout;
+  
+        // Check if the layout has valid data and update the state
+        if (savedLayout && Array.isArray(savedLayout)) {
+          const layoutToLoad = savedLayout.map(item => ({
+            i: item.i || `${item.type}-${Date.now()}`,  // Unique identifier for the widget
+            type: item.type,
+            x: item.x,
+            y: item.y,
+            w: item.w,
+            h: item.h,
+          }));
+  
+          setLayout(layoutToLoad);  // Update the layout state with the saved layout
+          console.log('Layout loaded successfully:', layoutToLoad);  // Log the saved layout for debugging
+        } else {
+          console.error('No valid layout found for this user.');
+        }
+      } else {
+        console.log('No layout found for this user.');
+      }
+    } catch (error) {
+      console.error('Error loading layout:', error);
+      alert('Failed to load layout. Please try again.');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      loadDeployedLayout(); // Load specific deployed layout if id is provided
+    } else {
+      loadLayout(); // Otherwise, load user-specific editable layout
+    }
+  }, [id, loadDeployedLayout, loadLayout]);
+
+  // Disable editing if an id is provided (non-editable deployed layout)
+  const isEditable = id === null;
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -240,83 +330,49 @@ export function DashboardComponent() {
       alert('Failed to save layout. Please try again.');
     }
   }, [layout, user]);
-  
-  
-  
-  
-
-  const loadLayout = useCallback(async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert('You need to log in first');
-        return;
-      }
-  
-      // Reference to the user's layout document in Firestore
-      const layoutDocRef = doc(db, 'userLayouts', user.uid);
-  
-      // Fetch the layout document from Firestore
-      const layoutDoc = await getDoc(layoutDocRef);
-  
-      if (layoutDoc.exists()) {
-        const savedLayout = layoutDoc.data().layout;
-  
-        // Check if the layout has valid data and update the state
-        if (savedLayout && Array.isArray(savedLayout)) {
-          const layoutToLoad = savedLayout.map(item => ({
-            i: item.i, // Use the saved unique identifier
-            type: item.type,
-            x: item.x,
-            y: item.y,
-            w: item.w,
-            h: item.h,
-          }));
-  
-          setLayout(layoutToLoad);  // Update the layout state with the saved layout
-          console.log('Layout loaded successfully:', layoutToLoad);  // Log the saved layout for debugging
-        } else {
-          console.error('No valid layout found for this user.');
-        }
-      } else {
-        console.log('No layout found for this user.');
-      }
-    } catch (error) {
-      console.error('Error loading layout:', error);
-      alert('Failed to load layout. Please try again.');
-    }
-  }, []);
-  
-  
-  useEffect(() => {
-    if (!loading && user) {
-      // Load user-specific layout and widget data
-      loadLayout()
-      // Optionally, load widget data here if not handled inside widgets
-    }
-  }, [user, loading])
 
   const deployLayout = useCallback(async () => {
     try {
-      const response = await fetch('/api/deploy-dashboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ layout }),
-      })
-      if (response.ok) {
-        // Show success message
-        alert('Dashboard deployed successfully!')
-      } else {
-        // Show error message
-        alert('Failed to deploy dashboard. Please try again.')
+      if (!user) {
+        alert('You need to log in first');
+        console.error('User is not logged in');
+        return;
       }
+
+      console.log("hello");
+      // Get the current highest ID from the deployedLayouts collection
+      const deployedLayoutsRef = collection(db, 'deployedLayouts');
+      const querySnapshot = await getDocs(deployedLayoutsRef);
+      console.log("got data");
+  
+      // New id is one more than the current max
+      const newId = querySnapshot.size + 1;
+
+      console.log(newId);
+  
+      // Document reference for the new layout
+      const layoutDocRef = doc(db, 'deployedLayouts', newId.toString());
+  
+      // Prepare the layout to save
+      const layoutToSave = layout.map(item => ({
+        i: item.i,
+        type: item.type,
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h
+      }));
+  
+      // Save the new layout document
+      await setDoc(layoutDocRef, { layout: layoutToSave, id: newId }, { merge: true });
+  
+      alert(`Dashboard deployed successfully with ID: ${newId}`);
     } catch (error) {
-      console.error('Error deploying dashboard:', error)
-      alert('An error occurred while deploying the dashboard.')
+      console.error('Error deploying dashboard:', error);
+      alert('Failed to deploy dashboard. Please try again.');
     }
-  }, [layout])
+  }, [layout]);
+  
 
   const toggleTheme = useCallback(() => {
     const root = document.documentElement
@@ -344,6 +400,7 @@ export function DashboardComponent() {
 
   return (
     <div className="flex h-screen bg-apple-gray-100 dark:bg-apple-gray-900">
+      {isEditable &&
       <aside className={`flex top-0 left-0 h-full z-10 ${isSidebarCollapsed ? 'w-16' : 'w-64'} p-6 bg-white dark:bg-apple-gray-800 shadow-apple rounded-r-apple transition-all duration-300 ease-in-out flex flex-col`}>
         <div className="flex justify-between items-center mb-8">
           {!isSidebarCollapsed && <h2 className="text-2xl font-semibold text-apple-gray-900 dark:text-white">Widgets</h2>}
@@ -399,7 +456,9 @@ export function DashboardComponent() {
           </>
         )}
       </aside>
+      }
       <main className="flex-1 p-8 overflow-hidden">
+        {isEditable &&
         <header className="flex justify-end items-center mb-8">
           <div className="flex items-center space-x-4">
             <Button onClick={saveLayout} className="apple-button rounded-full">
@@ -410,6 +469,7 @@ export function DashboardComponent() {
             </Button>
           </div>
         </header>
+        }
         <div
           ref={containerRef}
           className="h-[calc(100vh-8rem)] rounded-apple p-4 overflow-auto relative bg-white dark:bg-apple-gray-800 shadow-apple"

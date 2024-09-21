@@ -20,8 +20,8 @@ export default function CommunityPage({ params }: CommunityPageProps) {
 
   return (
     <Wrapper>
-      <DashboardComponent />
-      <ChatBox />
+      <DashboardComponent id={params.id} />
+      <ChatBox chatId={params.id}/>
     </Wrapper>
   )
 }
