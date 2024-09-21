@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { LandingPageComponent } from '@/components/landingPage'
 
 export default function Home() {
-  redirect('/community');
+  return <LandingPageComponent />
 }
