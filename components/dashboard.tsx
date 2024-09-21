@@ -49,11 +49,8 @@ import {
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore"; // Import collection and getDocs
 import { auth, db } from '@/lib/firebase'; 
 import { useAuth } from '@/lib/useAuth'
-<<<<<<< HEAD
 import { useRouter } from 'next/navigation'  // Change this import
-=======
 import { VaultProvider } from '../contexts/VaultContext'
->>>>>>> 9def827 (done trading vault frontend)
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
