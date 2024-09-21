@@ -30,6 +30,7 @@ import { ChatComponent } from './widgets/Chat'
 import { SpotPortfolio } from './widgets/trading/spot-portfolio'
 import { TradeSignal } from './widgets/trading/trade-signal'
 import { AnnounceBanner } from './widgets/general/announce-banner'
+import { AnnounceBanner2 } from './widgets/general/announce-banner2'
 import { Countdown } from './widgets/general/countdown'
 import { EventCalendar } from './widgets/general/event-calendar'
 import { MediaDisplay } from './widgets/general/media-display'
@@ -48,6 +49,7 @@ import {
 
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from '@/lib/firebase'; 
+import { useAuth } from '@/lib/useAuth'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -60,6 +62,7 @@ const widgets: Widgets = {
   spotPortfolio: { type: 'spotPortfolio', title: 'Spot Portfolio', w: 4, h: 4, component: SpotPortfolio },
   tradeSignal: { type: 'tradeSignal', title: 'Trade Signal', w: 3, h: 4, component: TradeSignal },
   announceBanner: { type: 'announceBanner', title: 'Announce Banner', w: 4, h: 2, component: AnnounceBanner },
+  announceBanner2: { type: 'announceBanner2', title: 'Announcement Banner 2', w: 4, h: 1, component: AnnounceBanner2 },
   countdown: { type: 'countdown', title: 'Countdown', w: 3, h: 3, component: Countdown },
   eventCalendar: { type: 'eventCalendar', title: 'Event Calendar', w: 4, h: 4, component: EventCalendar },
   mediaDisplay: { type: 'mediaDisplay', title: 'Media Display', w: 3, h: 4, component: MediaDisplay },
@@ -94,6 +97,8 @@ export function DashboardComponent() {
   const widgetsPerPage = 4
   const totalWidgets = Object.keys(widgets).length
   const totalPages = Math.ceil(totalWidgets / widgetsPerPage)
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -180,39 +185,31 @@ export function DashboardComponent() {
 
   const saveLayout = useCallback(async () => {
     try {
-      const user = auth.currentUser;
       if (!user) {
         alert('You need to log in first');
         console.error('User is not logged in');
         return;
       }
-  
-      // Create a simplified layout array containing the relevant information
+
       const layoutToSave = layout.map(item => ({
-        i: item.i,  // Unique identifier for the widget
-        type: item.type,  // Assuming `type` holds the widget name
+        i: item.i,
+        type: item.type,
         x: item.x,
         y: item.y,
         w: item.w,
         h: item.h
       }));
-  
-      console.log(`Saving layout for user: ${user.uid}`); // Log the user ID
-      console.log('Layout being saved:', layoutToSave); // Log the layout being saved
-  
-      // Reference to the user's layout document
+
       const layoutDocRef = doc(db, 'userLayouts', user.uid);
-      
-      // Save the layout to Firestore
+
       await setDoc(layoutDocRef, { layout: layoutToSave }, { merge: true });
-      
+
       alert('Layout saved successfully!');
-      console.log('Layout saved successfully');
     } catch (error) {
-      console.error('Error saving layout:', error); // Log error for better understanding
+      console.error('Error saving layout:', error);
       alert('Failed to save layout. Please try again.');
     }
-  }, [layout]);
+  }, [layout, user]);
   
   
   

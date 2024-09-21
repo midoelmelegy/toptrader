@@ -6,6 +6,9 @@ import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { X, Sun, Moon, Bell, Settings, LogOut, Menu } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useAuth } from '@/lib/useAuth'
+import { logoutUser } from '@/lib/firebaseAuth'
+import { useRouter } from 'next/navigation'
 
 import {
     DropdownMenu,
@@ -30,6 +33,8 @@ const pages: Record<string, string> = {
 export default function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
     const [theme, setTheme] = useState('dark');
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
     const toggleTheme = useCallback(() => {
         const root = document.documentElement;
@@ -53,6 +58,18 @@ export default function Wrapper({ children }: WrapperProps) {
             </DropdownMenuItem>
         );
     });
+
+    const userName = user?.displayName || user?.email || 'User'
+    const userEmail = user?.email || ''
+
+    const handleLogout = async () => {
+        const { error } = await logoutUser();
+        if (!error) {
+            router.push('/login');
+        } else {
+            console.error('Logout failed:', error);
+        }
+    };
 
     return (
         <div className="flex flex-col h-screen">
@@ -84,25 +101,25 @@ export default function Wrapper({ children }: WrapperProps) {
                                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                     <Avatar className="h-8 w-8 rounded-full">
                                         <AvatarImage src="/placeholder.svg?height=32&width=32&text=JD" alt="@johndoe" />
-                                        <AvatarFallback>JD</AvatarFallback>
+                                        <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56 apple-card" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-medium leading-none">John Doe</p>
+                                        <p className="text-sm font-medium leading-none">{userName}</p>
                                         <p className="text-xs leading-none text-muted-foreground">
-                                            john@example.com
+                                            {userEmail}
                                         </p>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push('/settings')}>
                                     <Settings className="mr-2 h-4 w-4" />
                                     <span>Settings</span>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleLogout}>
                                     <LogOut className="mr-2 h-4 w-4" />
                                     <span>Log out</span>
                                 </DropdownMenuItem>
