@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { X, Sun, Moon, Bell, Settings, LogOut, Menu } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ConnectWalletButton } from '@/components/wallet/index'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
@@ -110,7 +109,6 @@ export default function Wrapper({ children }: WrapperProps) {
                             </h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            {/* <ConnectWalletButton /> */}
                             <ConnectWallet theme={theme} />
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
