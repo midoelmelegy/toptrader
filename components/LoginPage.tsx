@@ -57,7 +57,7 @@ export function LoginPage() {
             photoURL: '',
             // ... other user properties
           })
-          router.push('/dashboard')
+          router.push('/community')
         } catch (error) {
           console.error("Error creating user document:", error)
           setError("Failed to create user profile. Please try again.")
@@ -70,7 +70,7 @@ export function LoginPage() {
         console.log(error);
         setError(getErrorMessage(error.code));
       } else {
-        router.push('/dashboard');
+        router.push('/community');
       }
     }
   };

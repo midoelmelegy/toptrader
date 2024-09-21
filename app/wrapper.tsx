@@ -32,7 +32,6 @@ interface WrapperProps {
 }
 
 const pages: Record<string, string> = {
-    "dashboard": "Dashboard",
     "community": "Community",
     "settings": "Settings",
     "profile": "Profile",
