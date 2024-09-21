@@ -112,7 +112,7 @@ export function ChatBox({ chatId }: ChatBoxProps) {
               }`}
             >
               <div
-                className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 ${
+                className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-3xl p-3 ${
                   message.sender === (user?.displayName || user?.email)
                     ? 'bg-blue-500 text-white'
                     : 'bg-white'
