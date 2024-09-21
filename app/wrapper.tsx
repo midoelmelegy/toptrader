@@ -4,19 +4,14 @@ import React, { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import { X, Sun, Moon, Bell, Settings, LogOut, Menu } from 'lucide-react'
+import { X, Sun, Moon, Bell, Settings, LogOut, Menu, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import {
-    ThirdwebProvider,
-    rainbowWallet,
-    metamaskWallet,
-    coinbaseWallet,
-    ConnectWallet,
-} from "@thirdweb-dev/react";
-
+import { createThirdwebClient } from "thirdweb";
+import { ThirdwebProvider, ConnectButton } from "thirdweb/react";
+import { BoostXPButton } from '../components/subscriptionModal';
 
 import {
     DropdownMenu,
@@ -38,6 +33,11 @@ const pages: Record<string, string> = {
 };
 
 const activeChain = "ethereum";
+
+const client = createThirdwebClient({
+    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Public client ID from environment variable
+    secretKey: process.env.THIRDWEB_SECRET_KEY,  // Secret key from environment variable
+});
 
 export default function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
@@ -82,11 +82,7 @@ export default function Wrapper({ children }: WrapperProps) {
     };
 
     return (
-        <ThirdwebProvider
-            clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
-            activeChain={activeChain}
-            supportedWallets={[coinbaseWallet(), rainbowWallet(), metamaskWallet()]}
-        >
+        <ThirdwebProvider client={client} desiredChain={activeChain}>
             <div className="flex flex-col h-screen">
                 <header className="w-full p-4 bg-white dark:bg-apple-gray-800 shadow-apple">
                     <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -107,7 +103,7 @@ export default function Wrapper({ children }: WrapperProps) {
                             </h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <ConnectWallet theme={theme} />
+                            <ConnectButton client={client} />
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                             </Button>
@@ -144,6 +140,7 @@ export default function Wrapper({ children }: WrapperProps) {
                         </div>
                     </div>
                 </header>
+                <BoostXPButton />
                 <main className="flex-1 p-8 overflow-auto">
                     {children}
                 </main>

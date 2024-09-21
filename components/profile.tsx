@@ -215,13 +215,6 @@ export function ProfileSearchComponent() {
           ))}
         </div>
       </main>
-
-      {/* Boost Button */}
-      <div className="fixed bottom-8 right-8">
-        <Button size="lg" className="rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90">
-          <Zap className="mr-2 h-5 w-5" /> Boost Your XP
-        </Button>
-      </div>
     </div>
   )
 }

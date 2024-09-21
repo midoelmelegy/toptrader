@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { DashboardComponent } from '../../../components/dashboard'
 import { ChatBox } from '../../../components/chat'
-import Wrapper from '../../wrapper'
 import { notFound, useRouter } from 'next/navigation'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -55,7 +54,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   const isOwner = user ? community.createdBy === user.uid : false
 
   return (
-    <Wrapper>
+    <div>
       {isOwner && (
         <div className="flex justify-end m-4">
           <Button onClick={() => router.push(`/community/${params.id}/dashboard`)} className="flex items-center">
@@ -100,6 +99,6 @@ export default function CommunityPage({ params }: CommunityPageProps) {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </div>
   )
 }

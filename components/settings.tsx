@@ -171,7 +171,7 @@ export function SettingsPage() {
         <CardContent className="flex items-center gap-4">
           <div className="relative">
             <Avatar className="h-20 w-20 rounded-full cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <AvatarImage alt="Profile picture" src={profilePicture || "/placeholder-avatar.jpg"} />
+              <AvatarImage alt="Profile picture" src={profilePicture || ""} />
               <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
             </Avatar>
             <input
