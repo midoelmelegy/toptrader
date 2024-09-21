@@ -4,23 +4,13 @@ import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { Responsive, WidthProvider, Layout } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { X, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, Sun, Moon, ChevronLeft, ChevronRight, Pencil, ChevronUp, ChevronDown } from 'lucide-react'
 
 // Components
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Bell, Settings, LogOut } from 'lucide-react'
-
-// Account Settings dropdown
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 // Widgets
 import { TradingVaultComponent } from './widgets/TradingVault'
@@ -45,14 +35,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
-import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore"; // Import collection and getDocs
-import { auth, db } from '@/lib/firebase'; 
+import { doc, setDoc, getDoc, collection, getDocs, updateDoc } from "firebase/firestore"
+import { auth, db } from '@/lib/firebase'
 import { useAuth } from '@/lib/useAuth'
-import { useRouter } from 'next/navigation'  // Change this import
+import { useRouter } from 'next/navigation'
 import { VaultProvider } from '../contexts/VaultContext'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
+
 // Widgets object
 const widgets: Widgets = {
   tradingVault: { type: 'tradingVault', title: 'Trading Vault', w: 4, h: 4, component: TradingVaultComponent },
@@ -85,20 +79,30 @@ interface Widgets {
 }
 
 interface DashboardComponentProps {
-  id?: string | null; // Optional ID for a non-editable deployed layout
+  id?: string | null;
+  isOwner?: boolean;
 }
 
-export function DashboardComponent({ id = null }: DashboardComponentProps) {
+export function DashboardComponent({ id = null, isOwner = false }: DashboardComponentProps) {
   const router = useRouter()
   const { user, loading } = useAuth()
   const [layout, setLayout] = useState<Array<Layout & { type?: string }>>([])
-  const [containerWidth, setContainerWidth] = useState(0)
-  const [theme, setTheme] = useState('dark')
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [containerWidth, setContainerWidth] = useState<number>(0)
+  const [theme, setTheme] = useState<string>('dark')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false)
   const [widgetToDelete, setWidgetToDelete] = useState<string | null>(null)
   const [widgetData, setWidgetData] = useState<{[key: string]: any}>({})
+  const [communityData, setCommunityData] = useState<any>(null)
+
+  const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false)
+  const [editedCommunityName, setEditedCommunityName] = useState<string>('')
+  const [editedCommunityDescription, setEditedCommunityDescription] = useState<string>('')
+  const [editedCommunityIcon, setEditedCommunityIcon] = useState<string>('')
+  const [updatingCommunity, setUpdatingCommunity] = useState<boolean>(false)
+
+  const [isCommunityInfoCollapsed, setIsCommunityInfoCollapsed] = useState<boolean>(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -110,17 +114,67 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
     }
   }, [user, loading, router])
 
-  // If id is provided, fetch the layout for that specific id
+  useEffect(() => {
+    // Fetch community data if id is provided
+    const fetchCommunityData = async () => {
+      if (id) {
+        try {
+          const communityRef = doc(db, 'communities', id)
+          const communityDoc = await getDoc(communityRef)
+          if (communityDoc.exists()) {
+            setCommunityData(communityDoc.data())
+          }
+        } catch (error) {
+          console.error('Error fetching community data:', error)
+        }
+      }
+    }
+    fetchCommunityData()
+  }, [id])
+
+  useEffect(() => {
+    if (communityData) {
+      setEditedCommunityName(communityData.name || '')
+      setEditedCommunityDescription(communityData.description || '')
+      setEditedCommunityIcon(communityData.icon || '')
+    }
+  }, [communityData])
+
+  const handleUpdateCommunity = async () => {
+    if (!id) return
+    setUpdatingCommunity(true)
+    try {
+      const communityRef = doc(db, 'communities', id)
+      await updateDoc(communityRef, {
+        name: editedCommunityName,
+        description: editedCommunityDescription,
+        icon: editedCommunityIcon,
+      })
+      setEditDialogOpen(false)
+      // Update local state
+      setCommunityData((prevData: any) => ({
+        ...prevData,
+        name: editedCommunityName,
+        description: editedCommunityDescription,
+        icon: editedCommunityIcon,
+      }))
+    } catch (error) {
+      console.error('Error updating community:', error)
+      alert('Failed to update community. Please try again.')
+    } finally {
+      setUpdatingCommunity(false)
+    }
+  }
+
   const loadDeployedLayout = useCallback(async () => {
     if (id) {
       try {
-        const layoutDocRef = doc(db, 'deployedLayouts', id);
-        const layoutDoc = await getDoc(layoutDocRef);
-        console.log("loading layout for id ", id);
-        if (layoutDoc.exists()) {
-          const savedLayout = layoutDoc.data().layout;
-          if (savedLayout && Array.isArray(savedLayout)) {
-            const layoutToLoad = savedLayout.map(item => ({
+        const communityRef = doc(db, 'communities', id);
+        const communityDoc = await getDoc(communityRef);
+        if (communityDoc.exists()) {
+          const deployedLayout = communityDoc.data().deployedLayout;
+          if (deployedLayout && Array.isArray(deployedLayout)) {
+            const layoutToLoad = deployedLayout.map(item => ({
               i: item.i || `${item.type}-${Date.now()}`,
               type: item.type,
               x: item.x,
@@ -128,13 +182,12 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
               w: item.w,
               h: item.h,
             }));
-            console.log(layoutToLoad);
             setLayout(layoutToLoad);
           } else {
-            console.error('Invalid layout data');
+            console.error('No deployed layout found for this community.');
           }
         } else {
-          console.error('No layout found for this id');
+          console.error('Community document does not exist.');
         }
       } catch (error) {
         console.error('Error loading deployed layout:', error);
@@ -187,14 +240,14 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
 
   useEffect(() => {
     if (id) {
-      loadDeployedLayout(); // Load specific deployed layout if id is provided
+      loadDeployedLayout(); // Load the deployed layout for the community
     } else {
-      loadLayout(); // Otherwise, load user-specific editable layout
+      loadLayout(); // Load user-specific editable layout
     }
   }, [id, loadDeployedLayout, loadLayout]);
 
-  // Disable editing if an id is provided (non-editable deployed layout)
-  const isEditable = id === null;
+  // Determine if the dashboard is editable based on isOwner
+  const isEditable = isOwner && id !== null
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -223,6 +276,7 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
+      if (!isEditable) return
       e.preventDefault()
       const widgetType = e.dataTransfer.getData('text')
       if (widgetType in widgets) {
@@ -256,13 +310,14 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
         }
       }
     },
-    [layout]
+    [layout, isEditable]
   )
 
   const handleDeleteWidget = useCallback((widgetId: string) => {
+    if (!isEditable) return
     setWidgetToDelete(widgetId)
     setDialogOpen(true)
-  }, [])
+  }, [isEditable])
 
   const confirmDelete = useCallback(() => {
     if (widgetToDelete) {
@@ -306,6 +361,7 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
   }
 
   const saveLayout = useCallback(async () => {
+    if (!isEditable) return
     try {
       if (!user) {
         alert('You need to log in first');
@@ -331,9 +387,10 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
       console.error('Error saving layout:', error);
       alert('Failed to save layout. Please try again.');
     }
-  }, [layout, user]);
+  }, [layout, user, isEditable])
 
   const deployLayout = useCallback(async () => {
+    if (!isEditable) return
     try {
       if (!user) {
         alert('You need to log in first');
@@ -341,20 +398,11 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
         return;
       }
 
-      console.log("hello");
-      // Get the current highest ID from the deployedLayouts collection
-      const deployedLayoutsRef = collection(db, 'deployedLayouts');
-      const querySnapshot = await getDocs(deployedLayoutsRef);
-      console.log("got data");
-  
-      // New id is one more than the current max
-      const newId = querySnapshot.size + 1;
+      if (!id) {
+        alert('Community ID is missing.');
+        return;
+      }
 
-      console.log(newId);
-  
-      // Document reference for the new layout
-      const layoutDocRef = doc(db, 'deployedLayouts', newId.toString());
-  
       // Prepare the layout to save
       const layoutToSave = layout.map(item => ({
         i: item.i,
@@ -364,16 +412,19 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
         w: item.w,
         h: item.h
       }));
-  
-      // Save the new layout document
-      await setDoc(layoutDocRef, { layout: layoutToSave, id: newId }, { merge: true });
-  
-      alert(`Dashboard deployed successfully with ID: ${newId}`);
+
+      // Document reference for the community
+      const communityRef = doc(db, 'communities', id);
+
+      // Save the layout under the community document
+      await updateDoc(communityRef, { deployedLayout: layoutToSave });
+
+      alert('Dashboard deployed successfully!');
     } catch (error) {
       console.error('Error deploying dashboard:', error);
       alert('Failed to deploy dashboard. Please try again.');
     }
-  }, [layout]);
+  }, [layout, isEditable, id, user]);
   
 
   const toggleTheme = useCallback(() => {
@@ -460,23 +511,58 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
       </aside>
       }
       <main className="flex-1 p-8 overflow-hidden">
-        {isEditable &&
-        <header className="flex justify-end items-center mb-8">
-          <div className="flex items-center space-x-4">
-            <Button onClick={saveLayout} className="apple-button rounded-full">
-              Save Layout
-            </Button>
-            <Button onClick={deployLayout} className="apple-button bg-green-500 hover:bg-green-600 rounded-full">
-              Deploy
-            </Button>
+        {isEditable && (
+          <div className={`mb-4 ${isCommunityInfoCollapsed ? 'h-16 overflow-hidden' : 'h-auto'} transition-all duration-300`}>
+            <div className="flex items-center justify-between">
+              {/* Community Info */}
+              <div className="flex items-center">
+                {communityData && (
+                  <div className="flex items-center">
+                    <div className="h-16 w-16 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full text-3xl mr-4">
+                      {communityData.icon}
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-bold">{communityData.name}</h1>
+                      {!isCommunityInfoCollapsed && (
+                        <p className="text-gray-600 dark:text-gray-300">{communityData.description}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Buttons and Collapse Toggle */}
+              <div className="flex items-center space-x-2">
+                {/* Save and Deploy buttons */}
+                <Button onClick={saveLayout} className="apple-button rounded-full">
+                  Save Layout
+                </Button>
+                <Button onClick={deployLayout} className="apple-button bg-green-500 hover:bg-green-600 rounded-full">
+                  Deploy
+                </Button>
+                {/* Edit Community Button */}
+                {communityData && (
+                  <Button onClick={() => setEditDialogOpen(true)} className="apple-button rounded-full flex items-center">
+                    <Pencil className="h-4 w-4 mr-2" /> Edit Community
+                  </Button>
+                )}
+                {/* Collapse Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsCommunityInfoCollapsed(!isCommunityInfoCollapsed)}
+                  className="text-gray-600 dark:text-gray-300"
+                >
+                  {isCommunityInfoCollapsed ? <ChevronDown /> : <ChevronUp />}
+                </Button>
+              </div>
+            </div>
           </div>
-        </header>
-        }
+        )}
         <div
           ref={containerRef}
           className="h-[calc(100vh-8rem)] rounded-apple p-4 overflow-auto relative bg-white dark:bg-apple-gray-800 shadow-apple"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={onDrop}
+          onDragOver={(e) => isEditable && e.preventDefault()}
+          onDrop={isEditable ? onDrop : undefined}
         >
           <ResponsiveGridLayout
             className="layout"
@@ -484,8 +570,8 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
             onLayoutChange={onLayoutChange}
-            isDraggable
-            isResizable
+            isDraggable={isEditable}
+            isResizable={isEditable}
             isBounded={false}
             preventCollision={false}
             draggableCancel=".no-drag"
@@ -505,18 +591,20 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
                   className="group"
                 >
                   <Card className="h-full overflow-hidden relative rounded-apple shadow-apple apple-transition">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="no-drag absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full text-apple-gray-500 hover:text-apple-gray-700 dark:text-apple-gray-400 dark:hover:text-apple-gray-200"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        handleDeleteWidget(widget.i)
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    {isEditable && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="no-drag absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full text-apple-gray-500 hover:text-apple-gray-700 dark:text-apple-gray-400 dark:hover:text-apple-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          e.preventDefault()
+                          handleDeleteWidget(widget.i)
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                     <CardHeader className="p-4">
                       <CardTitle className="text-xl font-semibold text-apple-gray-900 dark:text-white">{widgets[widget.type || '']?.title || 'Unknown Widget'}</CardTitle>
                     </CardHeader>
@@ -529,6 +617,50 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
             )}
           </ResponsiveGridLayout>
         </div>
+
+        {/* Edit Community Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Community</DialogTitle>
+              <DialogDescription>Edit the details of your community.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-community-name">Community Name</Label>
+                <Input
+                  id="edit-community-name"
+                  value={editedCommunityName}
+                  onChange={(e) => setEditedCommunityName(e.target.value)}
+                  placeholder="Enter community name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-community-description">Description</Label>
+                <Textarea
+                  id="edit-community-description"
+                  value={editedCommunityDescription}
+                  onChange={(e) => setEditedCommunityDescription(e.target.value)}
+                  placeholder="Enter community description"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-community-icon">Icon</Label>
+                <Input
+                  id="edit-community-icon"
+                  value={editedCommunityIcon}
+                  onChange={(e) => setEditedCommunityIcon(e.target.value)}
+                  placeholder="Enter an emoji or icon"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleUpdateCommunity} disabled={updatingCommunity}>
+                {updatingCommunity ? 'Updating...' : 'Update Community'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px] apple-card">
