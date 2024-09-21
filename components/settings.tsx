@@ -45,7 +45,7 @@ export function SettingsPage() {
           if (userDoc.exists()) {
             const data = userDoc.data()
             setDisplayName(data.displayName || '')
-            setProfilePicture(data.profilePicture || '')
+            setProfilePicture(data.photoURL || '')
             setConnectedAccounts(data.connectedAccounts || {
               twitter: false,
               github: false,
@@ -98,13 +98,7 @@ export function SettingsPage() {
         const storageRef = ref(storage, `profilePictures/${user.uid}/${uniqueFileName}`);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
-        setProfilePicture(downloadURL);
-        
-        // // Update user document with new profile picture URL
-        // const userDocRef = doc(db, 'users', user.uid);
-        // await updateDoc(userDocRef, { profilePicture: downloadURL });
-        
-        setSuccessMessage('Profile picture updated successfully');
+        setProfilePicture(downloadURL);        
       } catch (error) {
         console.error('Error uploading profile picture:', error);
         setError('Failed to upload profile picture. Please try again.');
