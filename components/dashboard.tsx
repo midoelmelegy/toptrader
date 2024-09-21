@@ -53,7 +53,6 @@ import { useRouter } from 'next/navigation'  // Change this import
 import { VaultProvider } from '../contexts/VaultContext'
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
-
 // Widgets object
 const widgets: Widgets = {
   tradingVault: { type: 'tradingVault', title: 'Trading Vault', w: 4, h: 4, component: TradingVaultComponent },

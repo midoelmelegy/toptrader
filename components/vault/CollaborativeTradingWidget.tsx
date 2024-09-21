@@ -1,12 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { VaultContext, VaultProvider } from '../../contexts/VaultContext';
 import { auth, db } from '../../lib/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import VaultCreationPanel from './VaultCreationPanel';
 import VaultManagementPanel from './VaultManagementPanel';
@@ -17,7 +14,14 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   const vaultContext = useContext(VaultContext);
 
   if (!vaultContext) {
-    return <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>VaultContext is undefined. Make sure CollaborativeTradingWidget is wrapped in a VaultProvider.</AlertDescription></Alert>;
+    return (
+      <Alert variant="destructive" className="no-drag bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800">
+        <AlertTitle className="text-red-800 dark:text-red-200">Error</AlertTitle>
+        <AlertDescription className="text-red-700 dark:text-red-300">
+          VaultContext is undefined. Make sure CollaborativeTradingWidget is wrapped in a VaultProvider.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   const { vaults, createVault, joinVault, closeVault } = vaultContext;
@@ -25,6 +29,7 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [widgetState, setWidgetState] = useState<'create' | 'manage' | 'join'>('create');
   const [error, setError] = useState<string | null>(null);
+  const [currentVault, setCurrentVault] = useState<Vault | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -34,14 +39,30 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (vaults.length > 0) {
-      setWidgetState('manage');
-    } else if (user?.uid) {
-      setWidgetState('create');
-    } else {
-      setWidgetState('join');
-    }
-  }, [vaults, user]);
+    const fetchVaults = async () => {
+      if (user) {
+        const vaultsRef = collection(db, 'vaults');
+        const q = query(vaultsRef, where('creatorId', '==', user.uid));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const userVault = querySnapshot.docs[0].data() as Vault;
+          setCurrentVault(userVault);
+          setWidgetState('manage');
+        } else {
+          const availableVaults = vaults.filter(vault => vault.creatorId !== user.uid);
+          if (availableVaults.length > 0) {
+            setCurrentVault(availableVaults[0]);
+            setWidgetState('join');
+          } else {
+            setWidgetState('create');
+          }
+        }
+      }
+    };
+
+    fetchVaults();
+  }, [user, vaults]);
 
   const initiatePayment = async (amount: number): Promise<boolean> => {
     // Simulating a payment process
@@ -69,6 +90,7 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
       
       const docRef = await addDoc(collection(db, 'vaults'), newVault);
       createVault({ ...newVault, id: docRef.id });
+      setCurrentVault({ ...newVault, id: docRef.id });
       setWidgetState('manage');
     } catch (error) {
       console.error('Error creating vault:', error);
@@ -77,9 +99,9 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   };
 
   const handleJoinVault = async (amount: number) => {
-    if (user && vaults.length > 0) {
+    if (user && currentVault) {
       try {
-        await joinVault(vaults[0].id, user.uid, amount);
+        await joinVault(currentVault.id, user.uid, amount);
         setWidgetState('manage');
       } catch (error) {
         setError('Error joining vault. Please try again.');
@@ -89,9 +111,10 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   };
 
   const handleCloseVault = async () => {
-    if (vaults.length > 0) {
+    if (currentVault) {
       try {
-        await closeVault(vaults[0].id);
+        await closeVault(currentVault.id);
+        setCurrentVault(null);
         setWidgetState('create');
       } catch (error) {
         setError('Error closing vault. Please try again.');
@@ -101,22 +124,25 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto no-drag bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md">
       <CardContent className="p-6">
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="mb-4 bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800">
+            <AlertTitle className="text-red-800 dark:text-red-200">Error</AlertTitle>
+            <AlertDescription className="text-red-700 dark:text-red-300">{error}</AlertDescription>
           </Alert>
         )}
         {widgetState === 'create' && (
-          <VaultCreationPanel onCreateVault={handleCreateVault} onInitiatePayment={initiatePayment} />
+          <VaultCreationPanel
+            onCreateVault={handleCreateVault}
+            onInitiatePayment={initiatePayment}
+          />
         )}
-        {widgetState === 'manage' && vaults.length > 0 && (
-          <VaultManagementPanel vault={vaults[0]} onCloseVault={handleCloseVault} />
+        {widgetState === 'manage' && currentVault && (
+          <VaultManagementPanel vault={currentVault} onCloseVault={handleCloseVault} />
         )}
-        {widgetState === 'join' && vaults.length > 0 && (
-          <VaultJoinPanel vault={vaults[0]} onJoinVault={handleJoinVault} />
+        {widgetState === 'join' && currentVault && (
+          <VaultJoinPanel vault={currentVault} onJoinVault={handleJoinVault} />
         )}
       </CardContent>
     </Card>

@@ -40,7 +40,7 @@ const client = createThirdwebClient({
 
 export default function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
-    const [theme, setTheme] = useState('dark');
+    const [theme, setTheme] = useState<'dark' | 'light'>('dark');
     const { user, loading } = useAuth();
     const router = useRouter();
 
