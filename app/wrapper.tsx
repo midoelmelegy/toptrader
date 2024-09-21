@@ -15,11 +15,8 @@ import {
     ThirdwebProvider,
     rainbowWallet,
     metamaskWallet,
+    coinbaseWallet,
     ConnectWallet,
-    useConnect,
-    useDisconnect,
-    useAddress,
-    useConnectionStatus,
 } from "@thirdweb-dev/react";
 
 
@@ -91,7 +88,7 @@ export default function Wrapper({ children }: WrapperProps) {
         <ThirdwebProvider
             clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
             activeChain={activeChain}
-            supportedWallets={[rainbowWallet(), metamaskWallet()]}
+            supportedWallets={[coinbaseWallet(), rainbowWallet(), metamaskWallet()]}
         >
             <div className="flex flex-col h-screen">
                 <header className="w-full p-4 bg-white dark:bg-apple-gray-800 shadow-apple">
@@ -114,7 +111,7 @@ export default function Wrapper({ children }: WrapperProps) {
                         </div>
                         <div className="flex items-center space-x-4">
                             {/* <ConnectWalletButton /> */}
-                            <ConnectWallet theme="light" />
+                            <ConnectWallet theme={theme} />
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                             </Button>
