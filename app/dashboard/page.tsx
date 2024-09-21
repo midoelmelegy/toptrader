@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import Wrapper from '../wrapper'
 import { useAuth } from '@/lib/useAuth'
 
 const DashboardComponent = dynamic(() => import('@/components/dashboard').then(mod => mod.DashboardComponent), { ssr: false })
@@ -27,8 +26,6 @@ export default function DashboardPage() {
   }
 
   return (
-    <Wrapper>
       <DashboardComponent />
-    </Wrapper>
   )
 }

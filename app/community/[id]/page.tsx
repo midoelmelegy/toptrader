@@ -1,7 +1,6 @@
 import { DashboardComponent } from '../../../components/dashboard'
 import { communities } from '../../../components/community/communities'
 import { ChatBox } from '../../../components/chat'
-import Wrapper from '../../wrapper'
 import { notFound } from 'next/navigation'
 
 interface CommunityPageProps {
@@ -19,9 +18,9 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   }
 
   return (
-    <Wrapper>
+    <div>
       <DashboardComponent id={params.id} />
       <ChatBox chatId={params.id}/>
-    </Wrapper>
+    </div>
   )
 }

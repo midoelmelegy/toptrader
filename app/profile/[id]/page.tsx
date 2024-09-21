@@ -1,7 +1,6 @@
 import { DashboardComponent } from '../../../components/dashboard'
 import { communities } from '../../../components/community/communities'
 import { ChatBox } from '../../../components/chat'
-import Wrapper from '../../wrapper'
 import { notFound } from 'next/navigation'
 import { ProfileComponent } from '@/components/profile'
 
@@ -20,9 +19,6 @@ export default function ProfilePage({ params }: ProfilePagePropes) {
   // }
 
   return (
-    <Wrapper>
-      {/* <ProfileComponent id={params.id} /> */}
       <ProfileComponent />
-    </Wrapper>
   )
 }
