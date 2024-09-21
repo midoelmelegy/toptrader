@@ -30,10 +30,8 @@ import { ChatComponent } from './widgets/Chat'
 import { SpotPortfolio } from './widgets/trading/spot-portfolio'
 import { TradeSignal } from './widgets/trading/trade-signal'
 import { AnnounceBanner } from './widgets/general/announce-banner'
-import { AnnounceBanner2 } from './widgets/general/announce-banner2'
 import { Countdown } from './widgets/general/countdown'
 import { EventCalendar } from './widgets/general/event-calendar'
-import { MediaDisplay } from './widgets/general/media-display'
 import { MediaCarousel } from './widgets/general/media-carousel'
 import { Poll } from './widgets/general/poll'
 
@@ -50,6 +48,7 @@ import {
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore"; // Import collection and getDocs
 import { auth, db } from '@/lib/firebase'; 
 import { useAuth } from '@/lib/useAuth'
+import { useRouter } from 'next/navigation'  // Change this import
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -62,10 +61,8 @@ const widgets: Widgets = {
   spotPortfolio: { type: 'spotPortfolio', title: 'Spot Portfolio', w: 4, h: 4, component: SpotPortfolio },
   tradeSignal: { type: 'tradeSignal', title: 'Trade Signal', w: 3, h: 4, component: TradeSignal },
   announceBanner: { type: 'announceBanner', title: 'Announce Banner', w: 4, h: 2, component: AnnounceBanner },
-  announceBanner2: { type: 'announceBanner2', title: 'Announcement Banner 2', w: 4, h: 1, component: AnnounceBanner2 },
   countdown: { type: 'countdown', title: 'Countdown', w: 3, h: 3, component: Countdown },
   eventCalendar: { type: 'eventCalendar', title: 'Event Calendar', w: 4, h: 4, component: EventCalendar },
-  mediaDisplay: { type: 'mediaDisplay', title: 'Media Display', w: 3, h: 4, component: MediaDisplay },
   mediaCarousel: { type: 'mediaCarousel', title: 'Media Carousel', w: 4, h: 4, component: MediaCarousel },
   poll: { type: 'poll', title: 'Poll', w: 3, h: 4, component: Poll },
 }
@@ -90,19 +87,26 @@ interface DashboardComponentProps {
 }
 
 export function DashboardComponent({ id = null }: DashboardComponentProps) {
+  const router = useRouter()
+  const { user, loading } = useAuth()
   const [layout, setLayout] = useState<Array<Layout & { type?: string }>>([])
   const [containerWidth, setContainerWidth] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
   const [theme, setTheme] = useState('dark')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const widgetsPerPage = 4
-  const totalWidgets = Object.keys(widgets).length
-  const totalPages = Math.ceil(totalWidgets / widgetsPerPage)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [widgetToDelete, setWidgetToDelete] = useState<string | null>(null)
+  const [widgetData, setWidgetData] = useState<{[key: string]: any}>({})
 
-  const { user } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const widgetsPerPage = 4
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
 
   // If id is provided, fetch the layout for that specific id
   const loadDeployedLayout = useCallback(async () => {
@@ -241,6 +245,10 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
             type: widgetType,
           }
           setLayout((prevLayout) => [...prevLayout, newWidget])
+          setWidgetData((prevData) => ({
+            ...prevData,
+            [newWidget.i]: {} // Initialize empty data or default values
+          }))
         } else {
           alert('Not enough space to add this widget.')
         }
@@ -248,9 +256,6 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
     },
     [layout]
   )
-
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [widgetToDelete, setWidgetToDelete] = useState<string | null>(null)
 
   const handleDeleteWidget = useCallback((widgetId: string) => {
     setWidgetToDelete(widgetId)
@@ -270,8 +275,33 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
       return <div>Invalid widget</div>
     }
     const WidgetComponent = widgets[widget.type]?.component
-    return WidgetComponent ? <WidgetComponent /> : <div>Widget not found</div>
-  }, [])
+    if (!WidgetComponent) {
+      return <div>Widget not found</div>
+    }
+    return (
+      <ErrorBoundary fallback={<div>Error loading widget</div>}>
+        <WidgetComponent
+          id={widget.i}
+          data={widgetData[widget.i]}
+          setData={(data: any) => setWidgetData((prevData) => ({ ...prevData, [widget.i]: data }))}
+        />
+      </ErrorBoundary>
+    )
+  }, [widgetData])
+
+  // You'll need to create an ErrorBoundary component
+  class ErrorBoundary extends React.Component<{children: React.ReactNode, fallback: React.ReactNode}> {
+    state = { hasError: false }
+    static getDerivedStateFromError() {
+      return { hasError: true }
+    }
+    render() {
+      if (this.state.hasError) {
+        return this.props.fallback
+      }
+      return this.props.children
+    }
+  }
 
   const saveLayout = useCallback(async () => {
     try {
@@ -356,6 +386,17 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
   const indexOfLastWidget = currentPage * widgetsPerPage
   const indexOfFirstWidget = indexOfLastWidget - widgetsPerPage
   const currentWidgets = widgetEntries.slice(indexOfFirstWidget, indexOfLastWidget)
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (!user) {
+    return null
+  }
+
+  const totalWidgets = Object.keys(widgets).length
+  const totalPages = Math.ceil(totalWidgets / widgetsPerPage)
 
   return (
     <div className="flex h-screen bg-apple-gray-100 dark:bg-apple-gray-900">
@@ -508,3 +549,5 @@ export function DashboardComponent({ id = null }: DashboardComponentProps) {
     </div>
   )
 }
+
+export default DashboardComponent;

@@ -54,17 +54,7 @@ export function LoginPage() {
             email: user.email,
             displayName: '',
             createdAt: new Date(),
-            twoFactorAuth: false,
-            emailNotifications: false,
-            pushNotifications: false,
-            profileVisibility: false,
-            activityStatus: false,
-            connectedAccounts: {
-              twitter: false,
-              github: false,
-              linkedin: false,
-              instagram: false
-            }
+            // ... other user properties
           })
           router.push('/dashboard')
         } catch (error) {

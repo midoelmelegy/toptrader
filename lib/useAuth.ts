@@ -8,7 +8,6 @@ interface UserData {
   email: string | null
   displayName: string | null
   photoURL: string | null
-  // Firebase Auth properties
   // Add custom properties
   bio?: string
 }
@@ -20,31 +19,28 @@ export function useAuth() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        // Map Firebase User to UserData
-        const basicUserData: UserData = {
+        const userData: UserData = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName,
           photoURL: firebaseUser.photoURL,
+        };
+
+        // Fetch additional user data from Firestore if needed
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          const additionalData = userDoc.data();
+          Object.assign(userData, additionalData);
         }
 
-        // Fetch additional user data from Firestore
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userDataFromFirestore = userDoc.data();
-          setUser({ ...basicUserData, ...userDataFromFirestore });
-        } else {
-          // User document doesn't exist
-          setUser(basicUserData);
-        }
+        setUser(userData);
       } else {
         setUser(null);
       }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   return { user, loading };
