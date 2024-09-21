@@ -84,7 +84,7 @@ export default function Wrapper({ children }: WrapperProps) {
                                     <span className="sr-only">Open menu</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-white bg-opacity-90" align="start">
+                            <DropdownMenuContent className="w-56 apple-card bg-white bg-opacity-90" align="start">
                                 {dropdownOptions}
                             </DropdownMenuContent>
                         </DropdownMenu>
