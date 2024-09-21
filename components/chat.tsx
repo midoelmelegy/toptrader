@@ -6,7 +6,12 @@ import { getAuth, onAuthStateChanged, User } from 'firebase/auth'
 import { app } from '../lib/firebase' // Adjust this import path as necessary
 import CustomScrollArea from './ui/scroll-area' // Adjust this import path as necessary
 
-export function ChatBox() {
+// Accept chatId as a prop
+interface ChatBoxProps {
+  chatId: string;
+}
+
+export function ChatBox({ chatId }: ChatBoxProps) {
   const [messages, setMessages] = useState<Array<{ text: string; sender: string; timestamp: number }>>([])
   const [newMessage, setNewMessage] = useState('')
   const [user, setUser] = useState<User | null>(null)
@@ -19,20 +24,23 @@ export function ChatBox() {
     })
 
     const db = getDatabase(app)
-    const messagesRef = ref(db, 'messages')
+    // Use chatId in the database reference
+    const messagesRef = ref(db, `chats/${chatId}/messages`)
 
     const handleNewMessage = (snapshot: any) => {
       const message = snapshot.val()
       setMessages((prevMessages) => [...prevMessages, message])
     }
 
+    // Listen for new messages
     onChildAdded(messagesRef, handleNewMessage)
 
+    // Clean up the listener on unmount
     return () => {
       unsubscribe()
       off(messagesRef, 'child_added', handleNewMessage)
     }
-  }, [])
+  }, [chatId]) // Make sure the effect runs when chatId changes
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -42,20 +50,21 @@ export function ChatBox() {
     e.preventDefault()
     if (newMessage.trim() && user) {
       const db = getDatabase(app)
-      const messagesRef = ref(db, 'messages')
+      // Reference the correct chat room using chatId
+      const messagesRef = ref(db, `chats/${chatId}/messages`)
       push(messagesRef, {
         text: newMessage,
         sender: user.displayName || user.email || 'Anonymous',
         timestamp: Date.now(),
       })
-      setNewMessage('')
+      setNewMessage('') // Clear the input field after sending the message
     }
   }
 
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100">
       <div className="bg-white shadow-md p-4">
-        <h1 className="text-2xl font-bold text-center">Chat Room</h1>
+        <h1 className="text-2xl font-bold text-center">Chat Room - {chatId}</h1>
       </div>
       <CustomScrollArea height="calc(100vh - 180px)" className="flex-grow">
         <div className="space-y-4 p-4">
