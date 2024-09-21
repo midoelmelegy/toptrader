@@ -4,9 +4,6 @@ import { auth, db } from '../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import VaultCreationPanel from './VaultCreationPanel';
 import VaultManagementPanel from './VaultManagementPanel';
@@ -17,7 +14,14 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   const vaultContext = useContext(VaultContext);
 
   if (!vaultContext) {
-    return <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>VaultContext is undefined. Make sure CollaborativeTradingWidget is wrapped in a VaultProvider.</AlertDescription></Alert>;
+    return (
+      <Alert variant="destructive" className="no-drag bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800">
+        <AlertTitle className="text-red-800 dark:text-red-200">Error</AlertTitle>
+        <AlertDescription className="text-red-700 dark:text-red-300">
+          VaultContext is undefined. Make sure CollaborativeTradingWidget is wrapped in a VaultProvider.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   const { vaults, createVault, joinVault, closeVault } = vaultContext;
@@ -101,22 +105,31 @@ const CollaborativeTradingWidgetInner: React.FC = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto no-drag bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md">
       <CardContent className="p-6">
         {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="mb-4 bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800">
+            <AlertTitle className="text-red-800 dark:text-red-200">Error</AlertTitle>
+            <AlertDescription className="text-red-700 dark:text-red-300">{error}</AlertDescription>
           </Alert>
         )}
         {widgetState === 'create' && (
-          <VaultCreationPanel onCreateVault={handleCreateVault} onInitiatePayment={initiatePayment} />
+          <VaultCreationPanel
+            onCreateVault={handleCreateVault}
+            onInitiatePayment={initiatePayment}
+          />
         )}
         {widgetState === 'manage' && vaults.length > 0 && (
-          <VaultManagementPanel vault={vaults[0]} onCloseVault={handleCloseVault} />
+          <VaultManagementPanel
+            vault={vaults[0]}
+            onCloseVault={handleCloseVault}
+          />
         )}
         {widgetState === 'join' && vaults.length > 0 && (
-          <VaultJoinPanel vault={vaults[0]} onJoinVault={handleJoinVault} />
+          <VaultJoinPanel
+            vault={vaults[0]}
+            onJoinVault={handleJoinVault}
+          />
         )}
       </CardContent>
     </Card>
