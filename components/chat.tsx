@@ -35,42 +35,47 @@ export function ChatBox({ chatId }: ChatBoxProps) {
   useEffect(() => {
     const db = getDatabase(app);
     const chatRef = ref(db, `chats/${chatId}`);
-
+  
     // Create the chat room if it doesn't exist
     createChatRoom(chatId).catch((error) => {
       console.error('Error creating chat room:', error);
     });
-
+  
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
+  
     const messagesRef = ref(db, `chats/${chatId}/messages`);
-
+  
     // Load messages when the chat room exists
     onValue(messagesRef, (snapshot) => {
       const messagesData = snapshot.val();
       if (messagesData) {
         const loadedMessages: Array<{ text: string; sender: string; timestamp: number }> = Object.values(messagesData);
+        // Set messages only if not already set
         setMessages(loadedMessages);
       }
     });
-
+  
     const handleNewMessage = (snapshot: any) => {
       const message = snapshot.val();
-      setMessages((prevMessages) => [...prevMessages, message]);
+      // Check if the message already exists to avoid duplicates
+      if (!messages.find(m => m.timestamp === message.timestamp)) {
+        setMessages(prevMessages => [...prevMessages, message]);
+      }
     };
-
+  
     // Listen for new messages
     onChildAdded(messagesRef, handleNewMessage);
-
+  
     // Clean up the listeners on unmount
     return () => {
       unsubscribe();
       off(messagesRef, 'child_added', handleNewMessage);
     };
-  }, [chatId]);
+  }, [chatId]); // Include messages in dependency array
+  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
