@@ -6,9 +6,22 @@ import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { X, Sun, Moon, Bell, Settings, LogOut, Menu } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ConnectWalletButton } from '@/components/wallet/index'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
+import type { AppProps } from "next/app";
+import {
+    ThirdwebProvider,
+    rainbowWallet,
+    metamaskWallet,
+    ConnectWallet,
+    useConnect,
+    useDisconnect,
+    useAddress,
+    useConnectionStatus,
+} from "@thirdweb-dev/react";
+
 
 import {
     DropdownMenu,
@@ -30,7 +43,9 @@ const pages: Record<string, string> = {
     "profile": "Profile",
 };
 
-export default function Wrapper({ children }: WrapperProps) {
+const activeChain = "ethereum";
+
+function InnerWrapper({ children }: WrapperProps) {
     const pathname = usePathname();
     const [theme, setTheme] = useState('dark');
     const { user, loading } = useAuth();
@@ -93,6 +108,8 @@ export default function Wrapper({ children }: WrapperProps) {
                         </h1>
                     </div>
                     <div className="flex items-center space-x-4">
+                        {/* <ConnectWalletButton /> */}
+                        <ConnectWallet theme="light" />
                         <Button onClick={toggleTheme} className="apple-button rounded-full">
                             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                         </Button>
@@ -134,4 +151,17 @@ export default function Wrapper({ children }: WrapperProps) {
             </main>
         </div>
     )
+}
+
+export default function Wrapper({ children }: WrapperProps) {
+    return (
+      <ThirdwebProvider
+        clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
+        activeChain={activeChain}
+        supportedWallets={[rainbowWallet(), metamaskWallet()]}
+      >
+        {/* Rendering the Component and passing pageProps */}
+        <InnerWrapper children />
+      </ThirdwebProvider>
+    );
 }
