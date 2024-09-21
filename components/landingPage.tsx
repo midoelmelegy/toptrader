@@ -1,7 +1,10 @@
-import React from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Users, Shield, Zap } from 'lucide-react'
+'use client'; // Ensure this is a Client Component
+
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Users, Shield, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // Updated import
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
   <Card className="bg-white dark:bg-gray-900">
@@ -39,6 +42,12 @@ const TestimonialCard: React.FC<{ quote: string; author: string }> = ({ quote, a
 )
 
 export const LandingPageComponent: React.FC = () => {
+  const router = useRouter()
+
+  const handleCommunityClick = () => {
+    router.push(`/login`)
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">
@@ -48,7 +57,7 @@ export const LandingPageComponent: React.FC = () => {
             <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-xl font-bold">CryptoTrust</span>
+          <span className="text-xl font-bold">tele.io</span>
         </div>
         <nav>
           <ul className="flex space-x-4">
@@ -62,8 +71,11 @@ export const LandingPageComponent: React.FC = () => {
       <main>
         <section className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">Unify Crypto Information, Build Trust</h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">CryptoTrust brings together fragmented crypto information and fosters a trustworthy community, empowering you to make informed decisions.</p>
-          <Button className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3">
+          <p className="text-xl mb-8 max-w-2xl mx-auto">tele.io brings together fragmented crypto information and fosters a trustworthy community, empowering you to make informed decisions.</p>
+          <Button 
+            className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
+            onClick={() => handleCommunityClick('get-started')}
+          >
             Get Started
           </Button>
         </section>
@@ -114,7 +126,7 @@ export const LandingPageComponent: React.FC = () => {
             <h2 className="text-3xl font-bold mb-12 text-center">What Our Users Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <TestimonialCard
-                quote="CryptoTrust has completely changed how I approach crypto information. It's my go-to platform for reliable insights."
+                quote="tele.io has completely changed how I approach crypto information. It's my go-to platform for reliable insights."
                 author="Alex Chen, Crypto Enthusiast"
               />
               <TestimonialCard
@@ -122,7 +134,7 @@ export const LandingPageComponent: React.FC = () => {
                 author="Sarah Johnson, Blockchain Developer"
               />
               <TestimonialCard
-                quote="Finally, a platform that brings together trustworthy information. CryptoTrust is a game-changer!"
+                quote="Finally, a platform that brings together trustworthy information. tele.io is a game-changer!"
                 author="Michael Lee, Crypto Investor"
               />
             </div>
@@ -132,7 +144,10 @@ export const LandingPageComponent: React.FC = () => {
         <section className="py-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-8">Ready to Join the Trusted Crypto Community?</h2>
-            <Button className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3">
+            <Button 
+              className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
+              onClick={() => handleCommunityClick('sign-up')}
+            >
               Sign Up Now
             </Button>
           </div>
@@ -147,7 +162,7 @@ export const LandingPageComponent: React.FC = () => {
               <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="text-lg font-bold">CryptoTrust</span>
+            <span className="text-lg font-bold">tele.io</span>
           </div>
           <nav>
             <ul className="flex space-x-4">
