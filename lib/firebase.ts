@@ -1,10 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"; // Import Firebase Auth SDK
-import { getFirestore } from "firebase/firestore"; // Import Firestore SDK
-import { getAnalytics, isSupported } from "firebase/analytics"; // Import Firebase Analytics
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getMessaging } from "firebase/messaging";
+import { getStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyANrIGGFC1ypPjTqRKJJfiFIHPx2PkOTTo",
   authDomain: "teleio-45628.firebaseapp.com",
@@ -15,28 +15,27 @@ const firebaseConfig = {
   measurementId: "G-WJXDMXSJS1"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Auth
 const auth = getAuth(app);
-
-// Initialize Firestore
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-// Conditionally initialize Firebase Analytics if the window object is available
-let analytics;
+let analytics: any = null;
+let messaging: any = null;
 
 if (typeof window !== "undefined") {
+  // Client-side only code
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);
     }
   });
+
+  try {
+    messaging = getMessaging(app);
+  } catch (error) {
+    console.error("Firebase messaging is not supported in this environment:", error);
+  }
 }
 
-// Initialize Firebase Messaging
-const messaging = getMessaging(app);
-
-
-export { app, auth, db, analytics, messaging };
+export { app, auth, db, storage, analytics, messaging };
