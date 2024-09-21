@@ -5,6 +5,17 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { doc, getDoc, setDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import { useAuth } from "@/lib/useAuth"
 
 interface CountdownState {
   days: number;
@@ -13,7 +24,17 @@ interface CountdownState {
   seconds: number;
 }
 
-export function Countdown() {
+interface CountdownProps {
+  id: string
+  data: any
+  setData: (data: any) => void
+}
+
+export function Countdown({ id, data, setData }: CountdownProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [eventName, setEventName] = useState(data?.eventName || "Countdown Event")
+  const [eventDate, setEventDate] = useState(data?.eventDate || new Date().toISOString().split("T")[0])
+  const { user } = useAuth()
   const [timeLeft, setTimeLeft] = useState<CountdownState>({
     days: 0,
     hours: 0,
@@ -22,7 +43,42 @@ export function Countdown() {
   });
 
   useEffect(() => {
-    const eventEndTime = new Date("2024-12-31T23:59:59").getTime()
+    if (user) {
+      loadCountdownData()
+    }
+  }, [user])
+
+  const loadCountdownData = async () => {
+    if (!user) return
+    try {
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
+      const docSnap = await getDoc(docRef)
+      if (docSnap.exists()) {
+        const widgetData = docSnap.data()
+        setEventName(widgetData.eventName || "Countdown Event")
+        setEventDate(widgetData.eventDate || new Date().toISOString().split("T")[0])
+        setData(widgetData)
+      }
+    } catch (error) {
+      console.error("Error loading countdown data:", error)
+    }
+  }
+
+  const saveCountdownData = async () => {
+    if (!user) return
+    try {
+      const widgetData = { eventName, eventDate }
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
+      await setDoc(docRef, widgetData)
+      setData(widgetData)
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Error saving countdown data:", error)
+    }
+  }
+
+  useEffect(() => {
+    const eventEndTime = new Date(`${eventDate}T23:59:59`).getTime()
     const interval = setInterval(() => {
       const now = new Date().getTime()
       const distance = eventEndTime - now
@@ -38,23 +94,22 @@ export function Countdown() {
       setTimeLeft({ days, hours, minutes, seconds })
     }, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [eventDate])
+
   return (
-    <Card className="bg-background rounded-lg border p-6 w-full max-w-md flex flex-col gap-4">
+    <div className="relative p-4 bg-background rounded-lg">
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center">
           <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
             <ClockIcon className="w-5 h-5 text-muted-foreground" />
           </div>
-          <h2 className="text-lg font-bold text-center">Countdown to Launch</h2>
+          <h2 className="text-lg font-bold text-center">{eventName}</h2>
         </div>
         <Button
-          variant="ghost"
-          size="icon"
-          className="w-8 h-8 rounded-full hover:bg-muted/50 transition-colors"
-          onClick={() => {}}
+          onClick={() => setIsEditing(true)}
+          className="no-drag absolute bottom-2 right-2"
         >
-          <XIcon className="w-4 h-4 text-muted-foreground" />
+          Edit
         </Button>
       </div>
       {timeLeft ? (
@@ -76,7 +131,31 @@ export function Countdown() {
       ) : (
         <div className="text-center text-muted-foreground">Event has ended.</div>
       )}
-    </Card>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Countdown</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              placeholder="Event Name"
+            />
+            <Input
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              placeholder="Event Date"
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={saveCountdownData}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
 
@@ -102,7 +181,7 @@ function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-function XIcon(props: React.SVGProps<SVGSVGElement>) {
+function EditIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -116,8 +195,8 @@ function XIcon(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
   )
 }

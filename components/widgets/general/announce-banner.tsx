@@ -1,75 +1,98 @@
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { doc, getDoc, setDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import { useAuth } from "@/lib/useAuth"
 
-export function AnnounceBanner() {
+interface AnnounceBannerProps {
+  id: string
+  data: any
+  setData: (data: any) => void
+}
+
+export function AnnounceBanner({ id, data, setData }: AnnounceBannerProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [headline, setHeadline] = useState(data?.headline || "Default Headline")
+  const [message, setMessage] = useState(data?.message || "Default Message")
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      loadBannerData()
+    }
+  }, [user])
+
+  const loadBannerData = async () => {
+    if (!user) return
+    try {
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
+      const docSnap = await getDoc(docRef)
+      if (docSnap.exists()) {
+        const widgetData = docSnap.data()
+        setHeadline(widgetData.headline || "Default Headline")
+        setMessage(widgetData.message || "Default Message")
+        setData(widgetData)
+      }
+    } catch (error) {
+      console.error("Error loading banner data:", error)
+    }
+  }
+
+  const saveBannerData = async () => {
+    if (!user) return
+    try {
+      const widgetData = { headline, message }
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
+      await setDoc(docRef, widgetData)
+      setData(widgetData)
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Error saving banner data:", error)
+    }
+  }
+
   return (
-    <div className="bg-background rounded-lg border p-6 w-full max-w-md flex flex-col gap-4">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center">
-          <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
-            <MegaphoneIcon className="w-5 h-5 text-muted-foreground" />
+    <div className="relative p-4 bg-background rounded-lg">
+      <h2 className="text-xl font-bold">{headline}</h2>
+      <p className="mt-2">{message}</p>
+      <Button
+        onClick={() => setIsEditing(true)}
+        className="no-drag absolute bottom-2 right-2"
+      >
+        Edit
+      </Button>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Announcement Banner</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder="Headline"
+            />
+            <Textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Message"
+            />
           </div>
-          <h2 className="text-lg font-bold text-center">New Feature Release</h2>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-8 h-8 rounded-full hover:bg-muted/50 transition-colors"
-          onClick={() => {}}
-        >
-          <XIcon className="w-4 h-4 text-muted-foreground" />
-        </Button>
-      </div>
-      <div className="text-muted-foreground">
-        <p>
-          We're excited to announce the launch of our new staking feature. Earn passive income by staking your crypto
-          assets.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row items-center gap-2">
-        <Button className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
-          Learn More
-        </Button>
-      </div>
+          <DialogFooter>
+            <Button onClick={saveBannerData}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
-}
-
-function MegaphoneIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m3 11 18-5v12L3 14v-3z" />
-      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
-    </svg>
-  )
-}
-
-function XIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
   )
 }

@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Wrapper from '../wrapper'
-import { DashboardComponent } from '@/components/dashboard'
 import { useAuth } from '@/lib/useAuth'
+
+const DashboardComponent = dynamic(() => import('@/components/dashboard').then(mod => mod.DashboardComponent), { ssr: false })
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
