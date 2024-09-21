@@ -84,7 +84,7 @@ export default function Wrapper({ children }: WrapperProps) {
                                     <span className="sr-only">Open menu</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="start">
+                            <DropdownMenuContent className="w-56 bg-white bg-opacity-90" align="start">
                                 {dropdownOptions}
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -106,7 +106,7 @@ export default function Wrapper({ children }: WrapperProps) {
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 apple-card" align="end" forceMount>
+                            <DropdownMenuContent className="w-56 apple-card bg-white bg-opacity-90" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-medium leading-none">{userName}</p>
