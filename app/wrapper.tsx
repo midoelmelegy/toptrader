@@ -59,8 +59,9 @@ export default function Wrapper({ children }: WrapperProps) {
         );
     });
 
-    const userName = user?.displayName || user?.email || 'User'
-    const userEmail = user?.email || ''
+    const userName = user?.displayName || user?.email || 'User';
+    const userEmail = user?.email || '';
+    const userProfilePicture = user?.photoURL || '';
 
     const handleLogout = async () => {
         const { error } = await logoutUser();
@@ -100,7 +101,7 @@ export default function Wrapper({ children }: WrapperProps) {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                     <Avatar className="h-8 w-8 rounded-full">
-                                        <AvatarImage src="/placeholder.svg?height=32&width=32&text=JD" alt="@johndoe" />
+                                        <AvatarImage alt="Profile picture" src={userProfilePicture || "/placeholder-avatar.jpg"} />
                                         <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                 </Button>

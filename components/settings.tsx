@@ -72,9 +72,9 @@ export function SettingsPage() {
       }
       const userDocRef = doc(db, 'users', user.uid)
       await updateDoc(userDocRef, {
-        displayName,
-        profilePicture,
-        connectedAccounts
+        displayName: displayName,
+        photoURL: profilePicture,
+        connectedAccounts,
       })
       setSuccessMessage('Your changes have been saved.')
     } catch (error) {
@@ -100,9 +100,9 @@ export function SettingsPage() {
         const downloadURL = await getDownloadURL(storageRef);
         setProfilePicture(downloadURL);
         
-        // Update user document with new profile picture URL
-        const userDocRef = doc(db, 'users', user.uid);
-        await updateDoc(userDocRef, { profilePicture: downloadURL });
+        // // Update user document with new profile picture URL
+        // const userDocRef = doc(db, 'users', user.uid);
+        // await updateDoc(userDocRef, { profilePicture: downloadURL });
         
         setSuccessMessage('Profile picture updated successfully');
       } catch (error) {

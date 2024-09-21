@@ -54,6 +54,7 @@ export function LoginPage() {
             email: user.email,
             displayName: '',
             createdAt: new Date(),
+            photoURL: '',
             // ... other user properties
           })
           router.push('/dashboard')
