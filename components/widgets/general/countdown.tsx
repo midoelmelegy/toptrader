@@ -1,21 +1,11 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import Link from "next/link"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { doc, getDoc, setDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import { useAuth } from "@/lib/useAuth"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Clock, Edit } from "lucide-react";
 
 interface CountdownState {
   days: number;
@@ -25,178 +15,131 @@ interface CountdownState {
 }
 
 interface CountdownProps {
-  id: string
-  data: any
-  setData: (data: any) => void
+  id: string;
+  data: {
+    eventName?: string;
+    eventDate?: string;
+  };
+  setData: (data: { eventName: string; eventDate: string }) => void;
 }
 
 export function Countdown({ id, data, setData }: CountdownProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [eventName, setEventName] = useState(data?.eventName || "Countdown Event")
-  const [eventDate, setEventDate] = useState(data?.eventDate || new Date().toISOString().split("T")[0])
-  const { user } = useAuth()
+  const [isEditing, setIsEditing] = useState(false);
+  const [eventName, setEventName] = useState(data?.eventName || "Countdown Event");
+  const [eventDate, setEventDate] = useState(data?.eventDate || new Date().toISOString().split("T")[0]);
   const [timeLeft, setTimeLeft] = useState<CountdownState>({
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
   useEffect(() => {
-    if (user) {
-      loadCountdownData()
-    }
-  }, [user])
-
-  const loadCountdownData = async () => {
-    if (!user) return
-    try {
-      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
-      const docSnap = await getDoc(docRef)
-      if (docSnap.exists()) {
-        const widgetData = docSnap.data()
-        setEventName(widgetData.eventName || "Countdown Event")
-        setEventDate(widgetData.eventDate || new Date().toISOString().split("T")[0])
-        setData(widgetData)
-      }
-    } catch (error) {
-      console.error("Error loading countdown data:", error)
-    }
-  }
-
-  const saveCountdownData = async () => {
-    if (!user) return
-    try {
-      const widgetData = { eventName, eventDate }
-      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
-      await setDoc(docRef, widgetData)
-      setData(widgetData)
-      setIsEditing(false)
-    } catch (error) {
-      console.error("Error saving countdown data:", error)
-    }
-  }
-
-  useEffect(() => {
-    const eventEndTime = new Date(`${eventDate}T23:59:59`).getTime()
+    const eventEndTime = new Date(`${eventDate}T23:59:59`).getTime();
     const interval = setInterval(() => {
-      const now = new Date().getTime()
-      const distance = eventEndTime - now
+      const now = new Date().getTime();
+      const distance = eventEndTime - now;
       if (distance < 0) {
-        clearInterval(interval)
-        setTimeLeft(null as unknown as CountdownState);
-        return
+        clearInterval(interval);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
       }
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24))
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000)
-      setTimeLeft({ days, hours, minutes, seconds })
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [eventDate])
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      setTimeLeft({ days, hours, minutes, seconds });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [eventDate]);
+
+  const saveCountdownData = () => {
+    const updatedData = { eventName, eventDate };
+    setData(updatedData);
+    setIsEditing(false);
+  };
+
+  const totalSeconds = 31 * 24 * 60 * 60; // Assuming max 31 days
+  const remainingSeconds =
+    timeLeft.days * 24 * 60 * 60 + timeLeft.hours * 60 * 60 + timeLeft.minutes * 60 + timeLeft.seconds;
+  const progressPercentage = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
 
   return (
-    <div className="relative p-4 bg-background rounded-lg">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center">
-          <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
-            <ClockIcon className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <h2 className="text-lg font-bold text-center">{eventName}</h2>
+    <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Countdown to Event</CardTitle>
+        <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+      </CardHeader>
+      <CardContent>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{eventName}</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {new Date(eventDate).toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+        </p>
+        <div className="grid grid-cols-4 gap-4 text-center mb-6">
+          {Object.entries(timeLeft).map(([unit, value]) => (
+            <div key={unit} className="flex flex-col bg-white dark:bg-gray-800 rounded-lg p-2 shadow-md">
+              <span className="text-3xl font-bold text-gray-800 dark:text-gray-200">{value}</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">{unit}</span>
+            </div>
+          ))}
         </div>
+        <Progress value={progressPercentage} className="h-2 bg-gray-200 dark:bg-gray-700" />
+      </CardContent>
+      <CardFooter>
         <Button
-          onClick={() => setIsEditing(true)}
-          className="no-drag absolute bottom-2 right-2"
+          variant="outline"
+          size="sm"
+          className="w-full bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300"
+          onClick={() => setIsEditing(true)} // Single click to open
         >
-          Edit
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Countdown
         </Button>
-      </div>
-      {timeLeft ? (
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-4xl font-bold">
-            <span>{timeLeft.days}</span>d <span>{timeLeft.hours}</span>h <span>{timeLeft.minutes}</span>m{" "}
-            <span>{timeLeft.seconds}</span>s
-          </div>
-          <Progress
-            value={
-              (timeLeft.days * 24 * 60 * 60 + timeLeft.hours * 60 * 60 + timeLeft.minutes * 60 + timeLeft.seconds) /
-              (31 * 24 * 60 * 60)
-            }
-          />
-          <Link href="#" className="text-primary hover:underline" prefetch={false}>
-            View Event Details
-          </Link>
-        </div>
-      ) : (
-        <div className="text-center text-muted-foreground">Event has ended.</div>
+      </CardFooter>
+
+      {isEditing && (
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogContent className="bg-white dark:bg-gray-900">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">Edit Countdown</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="eventName" className="text-gray-700 dark:text-gray-300">
+                  Event Name
+                </Label>
+                <Input
+                  id="eventName"
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                  placeholder="Enter event name"
+                  className="border-gray-300 dark:border-gray-700 focus:ring-gray-500 dark:focus:ring-gray-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="eventDate" className="text-gray-700 dark:text-gray-300">
+                  Event Date
+                </Label>
+                <Input
+                  id="eventDate"
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="border-gray-300 dark:border-gray-700 focus:ring-gray-500 dark:focus:ring-gray-400"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={saveCountdownData}
+                className="bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
-
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Countdown</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              placeholder="Event Name"
-            />
-            <Input
-              type="date"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              placeholder="Event Date"
-            />
-          </div>
-          <DialogFooter>
-            <Button onClick={saveCountdownData}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
-
-function ClockIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  )
-}
-
-function EditIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-    </svg>
-  )
+    </Card>
+  );
 }
