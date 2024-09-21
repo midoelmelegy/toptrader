@@ -34,6 +34,7 @@ import { Countdown } from './widgets/general/countdown'
 import { EventCalendar } from './widgets/general/event-calendar'
 import { MediaCarousel } from './widgets/general/media-carousel'
 import { Poll } from './widgets/general/poll'
+import CollaborativeTradingWidget from './vault/CollaborativeTradingWidget'
 
 import {
   Dialog,
@@ -48,7 +49,11 @@ import {
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore"; // Import collection and getDocs
 import { auth, db } from '@/lib/firebase'; 
 import { useAuth } from '@/lib/useAuth'
+<<<<<<< HEAD
 import { useRouter } from 'next/navigation'  // Change this import
+=======
+import { VaultProvider } from '../contexts/VaultContext'
+>>>>>>> 9def827 (done trading vault frontend)
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -65,6 +70,7 @@ const widgets: Widgets = {
   eventCalendar: { type: 'eventCalendar', title: 'Event Calendar', w: 4, h: 4, component: EventCalendar },
   mediaCarousel: { type: 'mediaCarousel', title: 'Media Carousel', w: 4, h: 4, component: MediaCarousel },
   poll: { type: 'poll', title: 'Poll', w: 3, h: 4, component: Poll },
+  collaborativeTrading: { type: 'collaborativeTrading', title: 'Collaborative Trading', w: 4, h: 4, component: CollaborativeTradingWidget },
 }
 
 // Type definitions
