@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase'
 import { useAuth } from '@/lib/useAuth'
 import { Button } from '@/components/ui/button'
 import { Pencil, MessageSquare, X } from 'lucide-react'
+import { Wrapper } from '../../wrapper'
 
 interface CommunityPageProps {
   params: {
@@ -54,7 +55,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   const isOwner = user ? community.createdBy === user.uid : false
 
   return (
-    <div>
+    <Wrapper>
       {isOwner && (
         <div className="flex justify-end m-4">
           <Button onClick={() => router.push(`/community/${params.id}/dashboard`)} className="flex items-center">
@@ -99,6 +100,6 @@ export default function CommunityPage({ params }: CommunityPageProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Wrapper>
   )
 }

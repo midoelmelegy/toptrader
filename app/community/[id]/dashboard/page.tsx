@@ -6,7 +6,7 @@ import { DashboardComponent } from '../../../../components/dashboard'
 import { useAuth } from '@/lib/useAuth'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import Wrapper from '../../../wrapper'
+import { Wrapper } from '../../../wrapper'
 
 interface DashboardPageProps {
   params: {

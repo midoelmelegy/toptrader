@@ -3,6 +3,7 @@ import { communities } from '../../../components/community/communities'
 import { ChatBox } from '../../../components/chat'
 import { notFound } from 'next/navigation'
 import { ProfileComponent } from '@/components/profile'
+import { Wrapper } from '../../wrapper'
 
 interface ProfilePagePropes {
   params: {
@@ -19,6 +20,8 @@ export default function ProfilePage({ params }: ProfilePagePropes) {
   // }
 
   return (
+    <Wrapper>
       <ProfileComponent />
+    </Wrapper>
   )
 }
