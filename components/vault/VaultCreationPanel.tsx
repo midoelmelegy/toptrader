@@ -43,38 +43,45 @@ const VaultCreationPanel: React.FC<VaultCreationPanelProps> = ({ onCreateVault, 
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Create a New Vault</h2>
-      {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+    <div className="space-y-4 no-drag">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create a New Vault</h2>
+      {error && (
+        <Alert variant="destructive" className="bg-red-100 dark:bg-red-900 border border-red-200 dark:border-red-800">
+          <AlertDescription className="text-red-700 dark:text-red-300">{error}</AlertDescription>
+        </Alert>
+      )}
       <div className="space-y-2">
-        <Label htmlFor="vault-name">Vault Name</Label>
+        <Label htmlFor="vault-name" className="text-gray-700 dark:text-gray-300">Vault Name</Label>
         <Input
           id="vault-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter vault name"
+          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="investment-amount">Investment Amount</Label>
+        <Label htmlFor="investment-amount" className="text-gray-700 dark:text-gray-300">Investment Amount</Label>
         <Input
           id="investment-amount"
           type="number"
           value={investmentAmount}
           onChange={(e) => setInvestmentAmount(e.target.value)}
           placeholder="Enter investment amount"
+          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="trade-time">Trade Time</Label>
+        <Label htmlFor="trade-time" className="text-gray-700 dark:text-gray-300">Trade Time</Label>
         <Input
           id="trade-time"
           type="datetime-local"
           value={tradeTime}
           onChange={(e) => setTradeTime(e.target.value)}
+          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
         />
       </div>
-      <Button onClick={handleSubmit} className="w-full">Create Vault</Button>
+      <Button onClick={handleSubmit} className="w-full bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">Create Vault</Button>
     </div>
   );
 };
