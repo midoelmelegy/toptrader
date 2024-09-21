@@ -1,255 +1,252 @@
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
+// MediaCarousel.tsx
+
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { doc, getDoc, setDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import { useAuth } from "@/lib/useAuth"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/lib/useAuth";
 
 interface MediaItem {
-  id: number
-  type: string
-  url: string
-  title: string
-  description: string
+  id: string;
+  type: string;
+  url: string;
+  title: string;
+  description: string;
 }
 
 interface MediaCarouselProps {
-  id: string
-  data: any
-  setData: (data: any) => void
+  id: string;
+  data: any;
+  setData: (data: any) => void;
 }
 
 export function MediaCarousel({ id, data, setData }: MediaCarouselProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [items, setItems] = useState<MediaItem[]>(data?.items || [])
-  const { user } = useAuth()
+  const [isEditing, setIsEditing] = useState(false);
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load items from localStorage on component mount
   useEffect(() => {
-    if (user) {
-      loadCarouselData()
+    const storedItems = localStorage.getItem(`mediaItems-${id}`);
+    if (storedItems) {
+      setItems(JSON.parse(storedItems));
+    } else if (user) {
+      // Load from Firestore if not in localStorage
+      loadCarouselData();
     }
-  }, [user])
+  }, [user]);
+
+  // Save items to localStorage whenever items change
+  useEffect(() => {
+    localStorage.setItem(`mediaItems-${id}`, JSON.stringify(items));
+  }, [items]);
 
   const loadCarouselData = async () => {
-    if (!user) return
+    if (!user) return;
     try {
-      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
-      const docSnap = await getDoc(docRef)
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id);
+      const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const widgetData = docSnap.data()
-        setItems(widgetData.items || [])
-        setData(widgetData)
+        const widgetData = docSnap.data();
+        setItems(widgetData.items || []);
+        setData(widgetData);
       }
     } catch (error) {
-      console.error("Error loading carousel data:", error)
+      console.error("Error loading carousel data:", error);
     }
-  }
+  };
 
   const saveCarouselData = async () => {
-    if (!user) return
+    if (!user) return;
     try {
-      const widgetData = { items }
-      const docRef = doc(db, "userWidgets", user.uid, "widgets", id)
-      await setDoc(docRef, widgetData)
-      setData(widgetData)
-      setIsEditing(false)
+      const widgetData = { items };
+      const docRef = doc(db, "userWidgets", user.uid, "widgets", id);
+      await setDoc(docRef, widgetData);
+      setData(widgetData);
     } catch (error) {
-      console.error("Error saving carousel data:", error)
+      console.error("Error saving carousel data:", error);
+    } finally {
+      setIsEditing(false);
     }
-  }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const newItem: MediaItem = {
+            id: Date.now().toString(),
+            type: file.type.startsWith("image/") ? "image" : "video",
+            url: e.target?.result as string,
+            title: "",
+            description: "",
+          };
+          setItems((prevItems) => [...prevItems, newItem]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleDeleteItem = (id: string) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
 
   return (
-    <div className="relative p-4 bg-background rounded-lg">
-      <Card className="w-full max-w-4xl">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md">
+      <Card className="w-full max-w-4xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>Media Carousel</CardTitle>
-          <CardDescription>Upload and manage your media content</CardDescription>
+          <CardTitle className="text-gray-900 dark:text-gray-100">
+            Media Carousel
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
+            View and manage your media content
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-muted rounded-lg p-4 flex flex-col gap-4">
-              <h3 className="text-lg font-semibold">Upload Media</h3>
-              <div className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-muted-foreground rounded-lg p-8">
-                <UploadIcon className="w-8 h-8 text-muted-foreground" />
-                <p className="text-muted-foreground">Drag and drop files or click to upload</p>
-                <Button size="sm">Upload</Button>
-              </div>
-            </div>
-            <div>
-              <Carousel className="rounded-lg overflow-hidden">
-                <CarouselContent>
-                  {items.map((item: MediaItem, index: number) => (
-                    <CarouselItem key={index}>
-                      {item.type === "image" && (
-                        <img
-                          src={item.url}
-                          alt={`Carousel Image ${index + 1}`}
-                          width={800}
-                          height={450}
-                          className="object-cover w-full h-[300px] md:h-[400px]"
-                          style={{ aspectRatio: "800/450", objectFit: "cover" }}
-                        />
-                      )}
-                      {item.type === "video" && (
-                        <video className="object-cover w-full h-[300px] md:h-[400px]" controls>
-                          <source
-                            src={item.url}
-                            type="video/mp4"
-                          />
-                        </video>
-                      )}
-                      <div className="p-4 bg-background">
-                        <h4 className="text-lg font-semibold">{item.title}</h4>
-                        <p className="text-muted-foreground">{item.description}</p>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious>
-                  <Button size="icon" variant="ghost">
-                    <ChevronLeftIcon className="w-6 h-6" />
-                    <span className="sr-only">Previous</span>
-                  </Button>
-                </CarouselPrevious>
-                <CarouselNext>
-                  <Button size="icon" variant="ghost">
-                    <ChevronRightIcon className="w-6 h-6" />
-                    <span className="sr-only">Next</span>
-                  </Button>
-                </CarouselNext>
-                <div className="mt-4 flex justify-center gap-2">
-                  <div />
-                  <div />
-                  <div />
-                </div>
-              </Carousel>
-            </div>
-          </div>
+          <Carousel className="w-full max-w-xs mx-auto">
+            <CarouselContent>
+              {items.map((item: MediaItem, index: number) => (
+                <CarouselItem key={item.id}>
+                  {item.type === "image" && (
+                    <img
+                      src={item.url}
+                      alt={`Carousel Image ${index + 1}`}
+                      className="object-cover w-full h-[200px] rounded-md"
+                      style={{ aspectRatio: "1", objectFit: "cover" }}
+                    />
+                  )}
+                  {item.type === "video" && (
+                    <video
+                      className="object-cover w-full h-[200px] rounded-md"
+                      controls
+                    >
+                      <source src={item.url} type={item.type} />
+                    </video>
+                  )}
+                  <div className="p-2 text-center">
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      {item.title || "Untitled"}
+                    </h4>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {item.description || "No description"}
+                    </p>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {items.length >= 2 && (
+              <>
+                <CarouselPrevious className="no-drag text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700" />
+                <CarouselNext className="no-drag text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700" />
+              </>
+            )}
+          </Carousel>
         </CardContent>
+        <CardFooter className="flex justify-end space-x-2 mt-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept="image/*,video/*"
+            multiple
+            className="hidden"
+          />
+          <Button
+            size="sm"
+            onClick={() => {
+              fileInputRef.current?.click();
+            }}
+            className="no-drag bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300"
+          >
+            Upload
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="no-drag bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300"
+          >
+            Edit
+          </Button>
+        </CardFooter>
       </Card>
-      <Button
-        onClick={() => setIsEditing(true)}
-        className="no-drag absolute bottom-2 right-2"
-      >
-        Edit
-      </Button>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <DialogHeader>
             <DialogTitle>Edit Media Carousel</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             {items.map((item, index) => (
-              <div key={index} className="flex items-center space-x-2">
+              <div key={item.id} className="flex flex-col space-y-2">
                 <Input
                   value={item.title}
                   onChange={(e) => {
-                    const newItems = [...items]
-                    newItems[index].title = e.target.value
-                    setItems(newItems)
+                    const newItems = [...items];
+                    newItems[index].title = e.target.value;
+                    setItems(newItems);
                   }}
-                  placeholder="Title"
-                />
-                <Input
-                  value={item.url}
-                  onChange={(e) => {
-                    const newItems = [...items]
-                    newItems[index].url = e.target.value
-                    setItems(newItems)
-                  }}
-                  placeholder="URL"
+                  placeholder="Enter title"
+                  className="no-drag bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                 />
                 <Textarea
                   value={item.description}
                   onChange={(e) => {
-                    const newItems = [...items]
-                    newItems[index].description = e.target.value
-                    setItems(newItems)
+                    const newItems = [...items];
+                    newItems[index].description = e.target.value;
+                    setItems(newItems);
                   }}
-                  placeholder="Description"
+                  placeholder="Enter description"
+                  className="no-drag bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                 />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteItem(item.id)}
+                  className="no-drag bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
+                >
+                  Delete
+                </Button>
               </div>
             ))}
           </div>
           <DialogFooter>
-            <Button onClick={saveCarouselData}>Save Changes</Button>
+            <Button
+              onClick={saveCarouselData}
+              className="no-drag bg-gray-800 text-white hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300"
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
-
-function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m15 18-6-6 6-6" />
-    </svg>
-  )
-}
-
-function ChevronRightIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  )
-}
-
-function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="17 8 12 3 7 8" />
-      <line x1="12" x2="12" y1="3" y2="15" />
-    </svg>
-  )
-}
-
-function PlayIcon(props: React.SVGProps<SVGSVGElement>) {
-  // ... existing code ...
+  );
 }
