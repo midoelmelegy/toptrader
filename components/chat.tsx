@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, useRef } from 'react'
-import { getDatabase, ref, push, onChildAdded, off } from 'firebase/database'
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth'
-import { app } from '../lib/firebase' // Adjust this import path as necessary
-import CustomScrollArea from './ui/scroll-area' // Adjust this import path as necessary
+import React, { useState, useEffect, useRef } from 'react';
+import { getDatabase, ref, push, onChildAdded, off, set, onValue, get } from 'firebase/database';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { app } from '../lib/firebase'; // Adjust this import path as necessary
+import CustomScrollArea from './ui/scroll-area'; // Adjust this import path as necessary
 
 // Accept chatId as a prop
 interface ChatBoxProps {
@@ -12,54 +12,83 @@ interface ChatBoxProps {
 }
 
 export function ChatBox({ chatId }: ChatBoxProps) {
-  const [messages, setMessages] = useState<Array<{ text: string; sender: string; timestamp: number }>>([])
-  const [newMessage, setNewMessage] = useState('')
-  const [user, setUser] = useState<User | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<Array<{ text: string; sender: string; timestamp: number }>>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Function to create a new chat room if it doesn't exist
+  const createChatRoom = async (chatId: string) => {
+    const db = getDatabase(app);
+    const chatRef = ref(db, `chats/${chatId}`);
+
+    // Check if the chat room exists
+    const snapshot = await get(chatRef);
+    if (!snapshot.exists()) {
+      // Set the initial structure for the chat room
+      await set(chatRef, {
+        messages: {} // Initialize messages as an empty object
+      });
+    }
+  };
 
   useEffect(() => {
-    const auth = getAuth(app)
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-    })
+    const db = getDatabase(app);
+    const chatRef = ref(db, `chats/${chatId}`);
 
-    const db = getDatabase(app)
-    // Use chatId in the database reference
-    const messagesRef = ref(db, `chats/${chatId}/messages`)
+    // Create the chat room if it doesn't exist
+    createChatRoom(chatId).catch((error) => {
+      console.error('Error creating chat room:', error);
+    });
+
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    const messagesRef = ref(db, `chats/${chatId}/messages`);
+
+    // Load messages when the chat room exists
+    onValue(messagesRef, (snapshot) => {
+      const messagesData = snapshot.val();
+      if (messagesData) {
+        const loadedMessages: Array<{ text: string; sender: string; timestamp: number }> = Object.values(messagesData);
+        setMessages(loadedMessages);
+      }
+    });
 
     const handleNewMessage = (snapshot: any) => {
-      const message = snapshot.val()
-      setMessages((prevMessages) => [...prevMessages, message])
-    }
+      const message = snapshot.val();
+      setMessages((prevMessages) => [...prevMessages, message]);
+    };
 
     // Listen for new messages
-    onChildAdded(messagesRef, handleNewMessage)
+    onChildAdded(messagesRef, handleNewMessage);
 
-    // Clean up the listener on unmount
+    // Clean up the listeners on unmount
     return () => {
-      unsubscribe()
-      off(messagesRef, 'child_added', handleNewMessage)
-    }
-  }, [chatId]) // Make sure the effect runs when chatId changes
+      unsubscribe();
+      off(messagesRef, 'child_added', handleNewMessage);
+    };
+  }, [chatId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (newMessage.trim() && user) {
-      const db = getDatabase(app)
-      // Reference the correct chat room using chatId
-      const messagesRef = ref(db, `chats/${chatId}/messages`)
+      const db = getDatabase(app);
+      const messagesRef = ref(db, `chats/${chatId}/messages`);
       push(messagesRef, {
         text: newMessage,
         sender: user.displayName || user.email || 'Anonymous',
         timestamp: Date.now(),
-      })
-      setNewMessage('') // Clear the input field after sending the message
+      });
+      setNewMessage(''); // Clear the input field after sending the message
     }
-  }
+  };
 
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100">
@@ -115,5 +144,5 @@ export function ChatBox({ chatId }: ChatBoxProps) {
         </div>
       </form>
     </div>
-  )
+  );
 }

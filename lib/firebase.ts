@@ -12,7 +12,8 @@ const firebaseConfig = {
   storageBucket: "teleio-45628.appspot.com",
   messagingSenderId: "1010702049530",
   appId: "1:1010702049530:web:32f09ee593162924bba943",
-  measurementId: "G-WJXDMXSJS1"
+  measurementId: "G-WJXDMXSJS1",
+  databaseURL: 'https://teleio-45628-default-rtdb.asia-southeast1.firebasedatabase.app',
 };
 
 const app = initializeApp(firebaseConfig);
