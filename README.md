@@ -1,37 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crypto Community Platform
 
-## Getting Started
+A customizable social platform designed to foster authentic communities in the crypto space. Unlike traditional social media, this platform emphasizes verified information and stable, long-term engagement between users, helping to build meaningful, trust-based relationships.
 
-First, run the development server:
+## What We Integrated Flow With
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This project leverages blockchain technology to manage two key aspects:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Subscription Services**: We've deployed a smart contract that handles subscription management, allowing users to subscribe to content or services within the platform. Payments and subscription duration are securely handled through blockchain transactions, ensuring transparency and immutability.
+   
+2. **User Profile Metrics**: Another set of smart contracts track and store user-specific metrics like follower count, reputation score, and ranking information. The blockchain ensures that this data is verified, secure, and decentralized.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+These integrations on Flow testnet allow the platform to combine the benefits of blockchain technology—such as security, transparency, and decentralized verification—with a social platform's community engagement features.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Meet the Team
 
-## Learn More
+We are a group of passionate university students with a strong interest in blockchain technology and decentralized applications (dApps). You can reach us on Telegram:
 
-To learn more about Next.js, take a look at the following resources:
+- @some_username03
+- @Qingzhe
+- @Axeeeeeeeel
+- @katetsq
+- @YPSONO
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# tele.io
+We believe that the future of social platforms lies in decentralization, and we're excited to contribute to that future with this project.
