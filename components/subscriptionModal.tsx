@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { useAddress } from "@thirdweb-dev/react";
 import { subscribe } from "../lib/subscriptionService";
 
 // Modal for subscription plans
