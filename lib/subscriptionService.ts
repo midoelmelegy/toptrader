@@ -21,11 +21,10 @@ export const subscribe = async (months: number, value: string) => {
         alert("Please connect your wallet");
         return;
     }
-    // if (!address) throw new Error("No connected wallet");
 
-    const contract = sdk.getContract(contractAddress, contractABI);
+    const contract = await sdk.getContract(contractAddress, contractABI);
 
-    const tx = await contract.call("subscribe", months, {
+    const tx = await contract.call("subscribe", [months], {
         value: ethers.utils.parseEther(value), // Convert value to wei
     });
     await tx.wait();
@@ -34,22 +33,21 @@ export const subscribe = async (months: number, value: string) => {
 
 // Function to check subscription status
 export const checkSubscription = async (account: string) => {
-    const contract = sdk.getContract(contractAddress, contractABI);
-    const isSubscribed = await contract.call("isSubscribed", account);
+    const contract = await sdk.getContract(contractAddress, contractABI);
+    const isSubscribed = await contract.call("isSubscribed", [account]);
     return isSubscribed;
 };
 
 // Function to get subscription end time
 export const getSubscriptionEndTime = async (account: string) => {
-    const contract = sdk.getContract(contractAddress, contractABI);
-    const endTime = await contract.call("getSubscriptionEndTime", account);
+    const contract = await sdk.getContract(contractAddress, contractABI);
+    const endTime = await contract.call("getSubscriptionEndTime", [account]);
     return endTime;
 };
 
 // Function to withdraw funds (owner only)
 export const withdrawFunds = async () => {
-    const address = useAddress(); // Get the connected wallet address
-    const contract = sdk.getContract(contractAddress, contractABI);
+    const contract = await sdk.getContract(contractAddress, contractABI);
 
     const tx = await contract.call("withdraw");
     await tx.wait();
