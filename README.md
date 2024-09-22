@@ -1,6 +1,6 @@
 # Tele.io
 
-A customizable social platform designed to foster authentic communities in the crypto space. Unlike traditional social media, this platform emphasizes verified information and stable, long-term engagement between users, helping to build meaningful, trust-based relationships.
+A customizable social platform designed to foster authentic communities in the crypto space, emphasizing meaningful, trust-based relationships.
 
 ## What We Integrated Flow With
 
