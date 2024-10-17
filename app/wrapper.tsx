@@ -35,8 +35,8 @@ const pages: Record<string, string> = {
 const activeChain = "sepolia";
 
 const client = createThirdwebClient({
-    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Public client ID from environment variable
-    secretKey: process.env.THIRDWEB_SECRET_KEY,  // Secret key from environment variable
+    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID || "", // Fallback to empty string if undefined
+    secretKey: process.env.THIRDWEB_SECRET_KEY || "",  // Fallback to empty string if undefined
 });
 
 export function Wrapper({ children }: WrapperProps) {
