@@ -1,4 +1,4 @@
-# Tele.io
+# TopTrader
 
 A customizable social platform designed to foster authentic communities in the crypto space, emphasizing meaningful, trust-based relationships.
 
