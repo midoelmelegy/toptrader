@@ -32,7 +32,7 @@ const pages: Record<string, string> = {
     "profile": "Profile",
 };
 
-const activeChain = "ethereum";
+const activeChain = "sepolia";
 
 const client = createThirdwebClient({
     clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Public client ID from environment variable
