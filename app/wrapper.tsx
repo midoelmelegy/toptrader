@@ -9,9 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import { createThirdwebClient } from "thirdweb";
-import { ThirdwebProvider, ConnectButton } from "thirdweb/react";
-import { BoostXPButton } from '../components/subscriptionModal';
+import { ThirdwebProvider, ConnectButton } from "@thirdweb-dev/react"
+import { BoostXPButton } from '../components/subscriptionModal'
 
 import {
     DropdownMenu,
@@ -32,12 +31,7 @@ const pages: Record<string, string> = {
     "profile": "Profile",
 };
 
-const activeChain = "sepolia";
-
-const client = createThirdwebClient({
-    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID || "", // Fallback to empty string if undefined
-    secretKey: process.env.THIRDWEB_SECRET_KEY || "",  // Fallback to empty string if undefined
-});
+const activeChain = "sepolia"; // Define your active blockchain network here
 
 export function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
@@ -82,7 +76,7 @@ export function Wrapper({ children }: WrapperProps) {
     };
 
     return (
-        <ThirdwebProvider client={client} desiredChain={activeChain}>
+        <ThirdwebProvider activeChain={activeChain}> {/* No client prop here */}
             <div className="flex flex-col h-screen">
                 <header className="w-full p-4 bg-white dark:bg-apple-gray-800 shadow-apple">
                     <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -103,7 +97,7 @@ export function Wrapper({ children }: WrapperProps) {
                             </h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <ConnectButton client={client} />
+                            <ConnectButton /> {/* Remove client prop */}
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                             </Button>
