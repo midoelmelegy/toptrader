@@ -146,7 +146,14 @@ export const LandingPageComponent: React.FC = () => {
             <h2 className="text-3xl font-bold mb-8">Ready to Join the Trusted Crypto Community?</h2>
             <Button 
               className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
-              onClick={() => handleCommunityClick('sign-up')}
+              onClick={handleCommunityClick}  // Remove the 'get-started' argument
+            >
+              Get Started
+            </Button>
+
+            <Button 
+              className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
+              onClick={handleCommunityClick}  // Remove the 'sign-up' argument
             >
               Sign Up Now
             </Button>
