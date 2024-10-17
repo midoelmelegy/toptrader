@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import { ThirdwebProvider, Web3Button } from "@thirdweb-dev/react" // Use Web3Button instead
+import { ThirdwebProvider, ConnectWallet } from "@thirdweb-dev/react" // Use ConnectWallet for wallet connection
 import { BoostXPButton } from '../components/subscriptionModal'
 
 import {
@@ -97,7 +97,7 @@ export function Wrapper({ children }: WrapperProps) {
                             </h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <Web3Button /> {/* Use Web3Button instead of ConnectButton */}
+                            <ConnectWallet /> {/* Use ConnectWallet for wallet connection */}
                             <Button onClick={toggleTheme} className="apple-button rounded-full">
                                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                             </Button>
