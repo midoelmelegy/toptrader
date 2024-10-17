@@ -47,9 +47,9 @@ export const LandingPageComponent: React.FC = () => {
   // Updated function to handle different destinations
   const handleCommunityClick = (destination: string) => {
     if (destination === 'get-started') {
-      router.push('/get-started');
+      router.push('/login');
     } else if (destination === 'sign-up') {
-      router.push('/sign-up');
+      router.push('/login');
     } else {
       router.push('/login');
     }
