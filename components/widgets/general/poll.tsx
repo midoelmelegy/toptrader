@@ -14,7 +14,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function Poll({ id }) {
+// Define prop types
+interface PollProps {
+  id: string; // or 'number' if your id is a number
+}
+
+export function Poll({ id }: PollProps) {
   const [isEditing, setIsEditing] = useState(true);
   const [question, setQuestion] = useState("");
   const [answerType, setAnswerType] = useState("multiple-choice");
@@ -50,13 +55,17 @@ export function Poll({ id }) {
   return (
     <Card className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md">
       <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-        <CardTitle className="text-gray-900 dark:text-gray-100">{isEditing ? "Edit Poll" : "View Poll"}</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-gray-100">
+          {isEditing ? "Edit Poll" : "View Poll"}
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         {isEditing ? (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="question" className="text-gray-700 dark:text-gray-300">Poll Question</Label>
+              <Label htmlFor="question" className="text-gray-700 dark:text-gray-300">
+                Poll Question
+              </Label>
               <Input
                 id="question"
                 placeholder="Enter Poll Question"
@@ -68,16 +77,18 @@ export function Poll({ id }) {
             </div>
             <div className="space-y-4">
               <div className="relative z-10">
-                <Label htmlFor="answer-type" className="text-gray-700 dark:text-gray-300">Answer Type</Label>
-                <div
-                  className="no-drag"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <Label htmlFor="answer-type" className="text-gray-700 dark:text-gray-300">
+                  Answer Type
+                </Label>
+                <div className="no-drag" onClick={(e) => e.stopPropagation()}>
                   <Select
                     value={answerType}
                     onValueChange={(value) => setAnswerType(value)}
                   >
-                    <SelectTrigger id="answer-type" className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
+                    <SelectTrigger
+                      id="answer-type"
+                      className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                    >
                       <SelectValue placeholder="Select answer type" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -198,8 +209,7 @@ export function Poll({ id }) {
 
             {answerType === "open-ended" && (
               <p className="italic text-gray-600 dark:text-gray-400">
-                {openEndedAnswer ||
-                  "Open-ended response will go here..."}
+                {openEndedAnswer || "Open-ended response will go here..."}
               </p>
             )}
 
