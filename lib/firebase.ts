@@ -6,14 +6,14 @@ import { getMessaging } from "firebase/messaging";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyANrIGGFC1ypPjTqRKJJfiFIHPx2PkOTTo",
-  authDomain: "teleio-45628.firebaseapp.com",
-  projectId: "teleio-45628",
-  storageBucket: "teleio-45628.appspot.com",
-  messagingSenderId: "1010702049530",
-  appId: "1:1010702049530:web:32f09ee593162924bba943",
-  measurementId: "G-WJXDMXSJS1",
-  databaseURL: 'https://teleio-45628-default-rtdb.asia-southeast1.firebasedatabase.app',
+  apiKey: "AIzaSyBlMxqutbE0agL13UXKaH0wq2wocv_spyU",
+  authDomain: "toptrader-de6c8.firebaseapp.com",
+  databaseURL: "https://toptrader-de6c8-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "toptrader-de6c8",
+  storageBucket: "toptrader-de6c8.appspot.com",
+  messagingSenderId: "792814475303",
+  appId: "1:792814475303:web:50446d9bfe7df09a239602",
+  measurementId: "G-VT3SNKFYSG"
 };
 
 const app = initializeApp(firebaseConfig);
