@@ -42,11 +42,18 @@ const TestimonialCard: React.FC<{ quote: string; author: string }> = ({ quote, a
 )
 
 export const LandingPageComponent: React.FC = () => {
-  const router = useRouter()
+  const router = useRouter();
 
-  const handleCommunityClick = () => {
-    router.push(`/login`)
-  }
+  // Updated function to handle different destinations
+  const handleCommunityClick = (destination: string) => {
+    if (destination === 'get-started') {
+      router.push('/get-started');
+    } else if (destination === 'sign-up') {
+      router.push('/sign-up');
+    } else {
+      router.push('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -146,14 +153,7 @@ export const LandingPageComponent: React.FC = () => {
             <h2 className="text-3xl font-bold mb-8">Ready to Join the Trusted Crypto Community?</h2>
             <Button 
               className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
-              onClick={handleCommunityClick}  // Remove the 'get-started' argument
-            >
-              Get Started
-            </Button>
-
-            <Button 
-              className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
-              onClick={handleCommunityClick}  // Remove the 'sign-up' argument
+              onClick={() => handleCommunityClick('sign-up')}
             >
               Sign Up Now
             </Button>
@@ -181,5 +181,5 @@ export const LandingPageComponent: React.FC = () => {
         </div>
       </footer>
     </div>
-  )
-}
+  );
+};
