@@ -3,7 +3,7 @@ import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { useAddress } from "@thirdweb-dev/react";
 
 // Replace with your contract address and ABI
-const contractAddress = "0x131C06c4DB271aEDc58463DD8c1eDE234397DdB6"; // Your deployed contract address
+const contractAddress = "0x4De63ee0E056b48A976B6c1bc295C376d549163A"; // Your deployed contract address
 const contractABI = [
     "function subscribe(uint256 _months) external payable",
     "function isSubscribed(address _account) external view returns (bool)",
@@ -12,7 +12,7 @@ const contractABI = [
 ];
 
 // Initialize the SDK
-const sdk = new ThirdwebSDK("ethereum"); // e.g., "ethereum", "polygon"
+const sdk = new ThirdwebSDK("sepolia"); // e.g., "ethereum", "polygon"
 
 // Function to subscribe
 export const subscribe = async (months: number, value: string) => {

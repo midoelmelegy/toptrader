@@ -2,7 +2,7 @@ import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { useAddress } from "@thirdweb-dev/react";
 
 // Replace with your contract address and ABI
-const contractAddress = "0xBd3B91D9bBf0231b317a9b21C963d4d43eEfb4e2"; // Your deployed contract address
+const contractAddress = "0x407a6c04A1bba02784B499471b45DE30CFb2E1ed"; // Your deployed contract address
 const contractABI = [
     "function createUser(string calldata userId) external",
     "function updateFollowers(string calldata userId, uint256 newFollowers) external",
@@ -16,7 +16,7 @@ const contractABI = [
 ];
 
 // Initialize the SDK
-const sdk = new ThirdwebSDK("ethereum"); // e.g., "ethereum", "polygon"
+const sdk = new ThirdwebSDK("sepolia"); // e.g., "ethereum", "polygon"
 
 // Function to create a new user
 export const createUser = async (userId: string) => {
