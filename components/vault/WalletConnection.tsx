@@ -1,22 +1,26 @@
-'use client'; // This enables Next.js to render this on the client side
+'use client';
 
-import React from 'react';
-import { ThirdwebProvider, ConnectWallet, useDisconnect, useAddress } from "@thirdweb-dev/react"; // Import necessary Thirdweb hooks
+import React, { useState, useEffect } from 'react';
+import { ThirdwebProvider, ConnectWallet, useDisconnect, useAddress } from "@thirdweb-dev/react";
 
-// Define the active blockchain network, Sepolia in this case
+// Define the active blockchain network
 const activeChain = "sepolia";
 
 const WalletConnection: React.FC = () => {
   const address = useAddress(); // Get the connected wallet address
   const disconnect = useDisconnect(); // Hook to disconnect the wallet
+  const [isConnected, setIsConnected] = useState(false); // State to track connection status
+
+  // Update the state based on the presence of the wallet address
+  useEffect(() => {
+    setIsConnected(!!address); // If there's an address, set to true, otherwise false
+  }, [address]);
 
   return (
     <div>
-      {/* If there's an address (wallet is connected), show the disconnect button */}
-      {address ? (
+      {isConnected ? (
         <button onClick={disconnect}>Disconnect Wallet</button>
       ) : (
-        // Else show the Thirdweb-provided connect wallet button
         <ConnectWallet />
       )}
     </div>
