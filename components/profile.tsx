@@ -109,7 +109,7 @@ export function ProfileComponent() {
 
 // Mock data for profiles
 const profiles = [
-  { id: "1", name: "Alice", level: 5, experience: 75, followers: 1234, following: 567, reputationScore: 89, rank: 'Gold', joinedDate: '2023-01-15' },
+  { id: "1", name: "Mo", level: 5, experience: 75, followers: 1234, following: 567, reputationScore: 89, rank: 'Gold', joinedDate: '2023-01-15' },
   { id: "2", name: "Bob", level: 6, experience: 85, followers: 2345, following: 678, reputationScore: 78, rank: 'Silver', joinedDate: '2023-02-12' },
   { id: "3", name: "Charlie", level: 4, experience: 65, followers: 3456, following: 789, reputationScore: 92, rank: 'Platinum', joinedDate: '2023-03-10' },
   { id: "4", name: "David", level: 7, experience: 95, followers: 4567, following: 890, reputationScore: 85, rank: 'Gold', joinedDate: '2023-04-05' },

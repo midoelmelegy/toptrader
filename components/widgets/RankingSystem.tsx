@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export function RankingSystemComponent() {
   const leaderboard = [
-    { id: 1, name: 'Alice', avatar: 'A', score: 1000 },
+    { id: 1, name: 'Mo', avatar: 'A', score: 1000 },
     { id: 2, name: 'Bob', avatar: 'B', score: 950 },
     { id: 3, name: 'Charlie', avatar: 'C', score: 900 },
     { id: 4, name: 'David', avatar: 'D', score: 850 },
