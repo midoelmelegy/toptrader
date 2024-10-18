@@ -64,7 +64,7 @@ export const LandingPageComponent: React.FC = () => {
             <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-xl font-bold">tele.io</span>
+          <span className="text-xl font-bold">toptrader.io</span>
         </div>
         <nav>
           <ul className="flex space-x-4">
@@ -77,8 +77,8 @@ export const LandingPageComponent: React.FC = () => {
 
       <main>
         <section className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">Unify Crypto Information, Build Trust</h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">tele.io brings together fragmented crypto information and fosters a trustworthy community, empowering you to make informed decisions.</p>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">Unify Crypto Signals, Build Trust</h1>
+          <p className="text-xl mb-8 max-w-2xl mx-auto">toptrader.io brings together fragmented crypto information and fosters a trustworthy community, empowering you to make informed decisions.</p>
           <Button 
             className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-lg px-8 py-3"
             onClick={() => handleCommunityClick('get-started')}
