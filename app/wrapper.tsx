@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/lib/useAuth'
 import { logoutUser } from '@/lib/firebaseAuth'
 import { useRouter } from 'next/navigation'
-import { ThirdwebProvider, ConnectWallet, createThirdwebClient } from "@thirdweb-dev/react" // Use ConnectWallet for wallet connection
+import { ThirdwebProvider, ConnectWallet } from "@thirdweb-dev/react" // Use ConnectWallet for wallet connection
 import { BoostXPButton } from '../components/subscriptionModal'
 
 import {
@@ -32,10 +32,6 @@ const pages: Record<string, string> = {
 };
 
 const activeChain = "sepolia"; // Define your active blockchain network here
-const client = createThirdwebClient({
-    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Public client ID
-    secretKey: process.env.THIRDWEB_SECRET_KEY, // Secret key
-});
 
 export function Wrapper({ children }: WrapperProps) {
     const pathname = usePathname();
@@ -80,7 +76,10 @@ export function Wrapper({ children }: WrapperProps) {
     };
 
     return (
-        <ThirdwebProvider activeChain={activeChain} clientId={client.clientId}> {/* No client prop here */}
+        <ThirdwebProvider 
+            activeChain={activeChain} 
+            clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID} // Use your env variable for client ID
+        > {/* No client prop here */}
             <div className="flex flex-col h-screen">
                 <header className="w-full p-4 bg-white dark:bg-apple-gray-800 shadow-apple">
                     <div className="max-w-7xl mx-auto flex justify-between items-center">
