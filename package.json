@@ -1,8 +1,8 @@
 {
-  "name": "telephone.io",
+  "name": "toptrader.io",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://alttabdlt.github.io/tele.io",
+  "homepage": "https://toptrader-alpha.vercel.app/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -133,7 +133,7 @@ export const LandingPageComponent: React.FC = () => {
             <h2 className="text-3xl font-bold mb-12 text-center">What Our Users Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <TestimonialCard
-                quote="tele.io has completely changed how I approach crypto information. It's my go-to platform for reliable insights."
+                quote="toptrader.io has completely changed how I approach crypto information. It's my go-to platform for reliable insights."
                 author="Alex Chen, Crypto Enthusiast"
               />
               <TestimonialCard
@@ -141,8 +141,8 @@ export const LandingPageComponent: React.FC = () => {
                 author="Sarah Johnson, Blockchain Developer"
               />
               <TestimonialCard
-                quote="Finally, a platform that brings together trustworthy information. tele.io is a game-changer!"
-                author="Michael Lee, Crypto Investor"
+                quote="Finally, a platform that brings together trustworthy information. toptrader.io is a game-changer!"
+                author="Mohamed Ali, Crypto Investor"
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ export const LandingPageComponent: React.FC = () => {
               <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="text-lg font-bold">tele.io</span>
+            <span className="text-lg font-bold">toptrader.io</span>
           </div>
           <nav>
             <ul className="flex space-x-4">

@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "tele.io",
+  title: "toptrader.io",
   description: "Community based webapp",
 };
 
