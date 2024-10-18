@@ -1,38 +1,72 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ThirdwebProvider, ConnectWallet, useDisconnect, useAddress } from "@thirdweb-dev/react";
+import { createThirdwebClient } from '@thirdweb-dev/sdk';
+import { ConnectButton } from "@thirdweb-dev/react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  inAppWallet,
+  createWallet,
+} from "thirdweb/wallets";
 
-const activeChain = "sepolia"; 
-const queryClient = new QueryClient(); // Initialize QueryClient for React Query
+// Define QueryClient for React Query
+const queryClient = new QueryClient(); 
+
+// Create the Thirdweb client
+const client = createThirdwebClient({
+  clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Use environment variable for client ID
+});
+
+// Define wallet options
+const wallets = [
+  inAppWallet({
+    auth: {
+      options: [
+        "google",
+        "discord",
+        "telegram",
+        "farcaster",
+        "email",
+        "x",
+        "passkey",
+        "phone",
+      ],
+    },
+  }),
+  createWallet("io.metamask"),
+  createWallet("com.coinbase.wallet"),
+  createWallet("me.rainbow"),
+  createWallet("io.rabby"),
+  createWallet("io.zerion.wallet"),
+  createWallet("com.trustwallet.app"),
+  createWallet("com.okex.wallet"),
+  createWallet("com.bitget.web3"),
+  createWallet("com.binance"),
+  createWallet("org.uniswap"),
+  createWallet("com.bybit"),
+  createWallet("com.ledger"),
+  createWallet("global.safe"),
+  createWallet("im.token"),
+  createWallet("com.crypto"),
+];
 
 const WalletConnection: React.FC = () => {
-  const address = useAddress(); // Get the connected wallet address
-  const disconnect = useDisconnect(); // Hook to disconnect the wallet
   const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
-    setIsConnected(!!address); // Update connection status based on wallet address
-  }, [address]);
-
+  // You can use Thirdweb's ConnectButton directly
   return (
-    <div>
-      {isConnected ? (
-        <button onClick={disconnect}>Disconnect Wallet</button>
-      ) : (
-        <ConnectWallet />
-      )}
-    </div>
+    <ConnectButton
+      client={client}
+      wallets={wallets}
+      connectModal={{ size: "compact" }} // Use compact modal
+    />
   );
 };
 
 // Wrap with QueryClientProvider and ThirdwebProvider
 const WalletConnectionWrapper: React.FC = () => (
-  <QueryClientProvider client={queryClient}> {/* Add QueryClientProvider */}
-    <ThirdwebProvider activeChain={activeChain} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
-      <WalletConnection />
-    </ThirdwebProvider>
+  <QueryClientProvider client={queryClient}> 
+    <WalletConnection />
   </QueryClientProvider>
 );
 
