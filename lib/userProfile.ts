@@ -1,4 +1,4 @@
-import { ThirdwebSDK } from "@thirdweb-dev/sdk";
+import { createThirdwebClient, getContract, defineChain } from "@thirdweb-dev/sdk";
 import { useAddress } from "@thirdweb-dev/react";
 
 // Replace with your contract address and ABI
@@ -15,8 +15,13 @@ const contractABI = [
     "function getUser(string calldata userId) external view returns (tuple(string id, uint256 creationDate, uint256 followers, uint256 following, uint256 reputationScore))"
 ];
 
-// Initialize the SDK
-const sdk = new ThirdwebSDK("sepolia"); // e.g., "ethereum", "polygon"
+// Define Sepolia chain ID
+const sepoliaChain = defineChain(11155111);
+
+// Initialize the Thirdweb client
+const client = createThirdwebClient({
+    clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID, // Use your client ID from environment variables
+});
 
 // Function to create a new user
 export const createUser = async (userId: string) => {
@@ -26,7 +31,13 @@ export const createUser = async (userId: string) => {
         return;
     }
 
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("createUser", [userId]);
     await tx.wait();
     return tx;
@@ -34,7 +45,13 @@ export const createUser = async (userId: string) => {
 
 // Function to update the number of followers
 export const updateFollowers = async (userId: string, newFollowers: number) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("updateFollowers", [userId, newFollowers]);
     await tx.wait();
     return tx;
@@ -42,7 +59,13 @@ export const updateFollowers = async (userId: string, newFollowers: number) => {
 
 // Function to update the number of following
 export const updateFollowing = async (userId: string, newFollowing: number) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("updateFollowing", [userId, newFollowing]);
     await tx.wait();
     return tx;
@@ -50,7 +73,13 @@ export const updateFollowing = async (userId: string, newFollowing: number) => {
 
 // Function to update reputation score
 export const updateReputationScore = async (userId: string, newScore: number) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("updateReputationScore", [userId, newScore]);
     await tx.wait();
     return tx;
@@ -58,7 +87,13 @@ export const updateReputationScore = async (userId: string, newScore: number) =>
 
 // Function to follow another user
 export const followUser = async (followerId: string, followeeId: string) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("follow", [followerId, followeeId]);
     await tx.wait();
     return tx;
@@ -66,7 +101,13 @@ export const followUser = async (followerId: string, followeeId: string) => {
 
 // Function to unfollow another user
 export const unfollowUser = async (followerId: string, followeeId: string) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const tx = await contract.call("unfollow", [followerId, followeeId]);
     await tx.wait();
     return tx;
@@ -74,21 +115,39 @@ export const unfollowUser = async (followerId: string, followeeId: string) => {
 
 // Function to check if a user is following another user
 export const isFollowing = async (followerId: string, followeeId: string) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const result = await contract.call("isFollowing", [followerId, followeeId]);
     return result;
 };
 
 // Function to get user details
 export const getUserDetails = async (userId: string) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const user = await contract.call("getUser", [userId]);
     return user; // user is a tuple, unpack it as needed
 };
 
 // Function to get user's rank
 export const getUserRank = async (userId: string) => {
-    const contract = await sdk.getContract(contractAddress, contractABI);
+    const contract = await getContract({
+        client,
+        chain: sepoliaChain,
+        address: contractAddress,
+        abi: contractABI,
+    });
+
     const rank = await contract.call("getRank", [userId]);
     return rank; // Adjust based on your rank representation (e.g., enum value)
 };
