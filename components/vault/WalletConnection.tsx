@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThirdwebProvider, ConnectWallet, useDisconnect, useAddress } from "@thirdweb-dev/react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Define the active blockchain network
-const activeChain = "sepolia";
+const activeChain = "sepolia"; 
+const queryClient = new QueryClient(); // Initialize QueryClient for React Query
 
 const WalletConnection: React.FC = () => {
   const address = useAddress(); // Get the connected wallet address
   const disconnect = useDisconnect(); // Hook to disconnect the wallet
-  const [isConnected, setIsConnected] = useState(false); // State to track connection status
+  const [isConnected, setIsConnected] = useState(false);
 
-  // Update the state based on the presence of the wallet address
   useEffect(() => {
-    setIsConnected(!!address); // If there's an address, set to true, otherwise false
+    setIsConnected(!!address); // Update connection status based on wallet address
   }, [address]);
 
   return (
@@ -27,11 +27,13 @@ const WalletConnection: React.FC = () => {
   );
 };
 
-// Wrap the component with ThirdwebProvider to provide blockchain context
+// Wrap with QueryClientProvider and ThirdwebProvider
 const WalletConnectionWrapper: React.FC = () => (
-  <ThirdwebProvider activeChain={activeChain}>
-    <WalletConnection />
-  </ThirdwebProvider>
+  <QueryClientProvider client={queryClient}> {/* Add QueryClientProvider */}
+    <ThirdwebProvider activeChain={activeChain} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
+      <WalletConnection />
+    </ThirdwebProvider>
+  </QueryClientProvider>
 );
 
 export default WalletConnectionWrapper;
